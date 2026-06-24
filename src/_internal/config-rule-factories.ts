@@ -13,17 +13,22 @@ type ConfigRuleDefinition = Readonly<{
 }>;
 type MessageIds = "configProblem";
 
-type Options = readonly [];
+type Options = [];
 
 const yamlTopLevelPropertyPattern = /^([A-Za-z][\w-]*)\s*:/gmu;
 const jsObjectPropertyPattern = /(?:^|[,{])\s*([A-Za-z][\w-]*)\s*:/gmu;
 
 const collectPropertyMatches = (
     sourceText: string,
-    pattern: RegExp
+    syntax: "js" | "yaml"
 ): string[] => {
+    const matches = sourceText.matchAll(
+        syntax === "yaml"
+            ? yamlTopLevelPropertyPattern
+            : jsObjectPropertyPattern
+    );
     const properties: string[] = [];
-    for (const match of sourceText.matchAll(pattern)) {
+    for (const match of matches) {
         const propertyName = match[1];
         if (typeof propertyName === "string") properties.push(propertyName);
     }
@@ -34,74 +39,14 @@ export const hasConfigProperty = (
     sourceText: string,
     propertyName: string
 ): boolean =>
-    collectPropertyMatches(sourceText, yamlTopLevelPropertyPattern).includes(
-        propertyName
-    ) ||
-    collectPropertyMatches(sourceText, jsObjectPropertyPattern).includes(
-        propertyName
-    ) ||
+    collectPropertyMatches(sourceText, "yaml").includes(propertyName) ||
+    collectPropertyMatches(sourceText, "js").includes(propertyName) ||
     sourceText.includes(`"${propertyName}"`);
 
-export const createRequirePropertyRule = (
-    definition: Omit<ConfigRuleDefinition, "check"> &
-        Readonly<{ propertyName: string }>
-): RuleModuleWithDocs<MessageIds, Options> =>
-    createConfigTextRule({
-        ...definition,
-        check: (sourceText) =>
-            hasConfigProperty(sourceText, definition.propertyName)
-                ? undefined
-                : `Expected this config to define '${definition.propertyName}'.`,
-    });
-
-export const createFilenameRule = (
-    definition: Omit<ConfigRuleDefinition, "check"> &
-        Readonly<{ allowedPattern: RegExp }>
-): RuleModuleWithDocs<MessageIds, Options> =>
-    createConfigTextRule({
-        ...definition,
-        check: (_sourceText, fileName) =>
-            definition.allowedPattern.test(fileName.replaceAll("\\", "/"))
-                ? undefined
-                : "Expected this config file to use a supported filename for this tool.",
-    });
-
-export const createUnknownPropertiesRule = (
-    definition: Omit<ConfigRuleDefinition, "check"> &
-        Readonly<{ allowedProperties: readonly string[] }>
-): RuleModuleWithDocs<MessageIds, Options> =>
-    createConfigTextRule({
-        ...definition,
-        check: (sourceText) => {
-            const known = new Set(definition.allowedProperties);
-            const properties = collectPropertyMatches(
-                sourceText,
-                yamlTopLevelPropertyPattern
-            );
-            const unknown = properties.find(
-                (propertyName) => !known.has(propertyName)
-            );
-            return typeof unknown === "string"
-                ? `Unexpected top-level config property '${unknown}'.`
-                : undefined;
-        },
-    });
-
-export const createNoEmptyStringRule = (
-    definition: Omit<ConfigRuleDefinition, "check">
-): RuleModuleWithDocs<MessageIds, Options> =>
-    createConfigTextRule({
-        ...definition,
-        check: (sourceText) =>
-            /["']{2}|-\s*["']{2}/v.test(sourceText)
-                ? "Expected config string values and patterns to be non-empty."
-                : undefined,
-    });
-
-export const createConfigTextRule = (
+export function createConfigTextRule(
     definition: ConfigRuleDefinition
-): RuleModuleWithDocs<MessageIds, Options> =>
-    createTypedRule<MessageIds, Options>({
+): RuleModuleWithDocs<MessageIds, Options> {
+    return createTypedRule<MessageIds, Options>({
         create: (context) =>
             toRuleListener({
                 Program() {
@@ -136,4 +81,58 @@ export const createConfigTextRule = (
             type: "problem",
         },
         name: definition.name,
+    });
+}
+
+export const createRequirePropertyRule = (
+    definition: Omit<ConfigRuleDefinition, "check"> &
+        Readonly<{ propertyName: string }>
+): RuleModuleWithDocs<MessageIds, Options> =>
+    createConfigTextRule({
+        ...definition,
+        check: (sourceText) =>
+            hasConfigProperty(sourceText, definition.propertyName)
+                ? undefined
+                : `Expected this config to define '${definition.propertyName}'.`,
+    });
+
+export const createFilenameRule = (
+    definition: Omit<ConfigRuleDefinition, "check"> &
+        Readonly<{ allowedPattern: RegExp }>
+): RuleModuleWithDocs<MessageIds, Options> =>
+    createConfigTextRule({
+        ...definition,
+        check: (_sourceText, fileName) =>
+            definition.allowedPattern.test(fileName.replaceAll("\\", "/"))
+                ? undefined
+                : "Expected this config file to use a supported filename for this tool.",
+    });
+
+export const createUnknownPropertiesRule = (
+    definition: Omit<ConfigRuleDefinition, "check"> &
+        Readonly<{ allowedProperties: readonly string[] }>
+): RuleModuleWithDocs<MessageIds, Options> =>
+    createConfigTextRule({
+        ...definition,
+        check: (sourceText) => {
+            const known = new Set(definition.allowedProperties);
+            const properties = collectPropertyMatches(sourceText, "yaml");
+            const unknown = properties.find(
+                (propertyName) => !known.has(propertyName)
+            );
+            return typeof unknown === "string"
+                ? `Unexpected top-level config property '${unknown}'.`
+                : undefined;
+        },
+    });
+
+export const createNoEmptyStringRule = (
+    definition: Omit<ConfigRuleDefinition, "check">
+): RuleModuleWithDocs<MessageIds, Options> =>
+    createConfigTextRule({
+        ...definition,
+        check: (sourceText) =>
+            /["']{2}|-\s*["']{2}/v.test(sourceText)
+                ? "Expected config string values and patterns to be non-empty."
+                : undefined,
     });

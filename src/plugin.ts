@@ -2,6 +2,7 @@ import type { ESLint, Linter } from "eslint";
 
 import * as yamlParser from "yaml-eslint-parser";
 
+// eslint-disable-next-line import-x/extensions -- Node JSON import attributes require the file extension at runtime.
 import packageJson from "../package.json" with { type: "json" };
 import { yamllintRules } from "./_internal/rules-registry.js";
 import {
@@ -26,14 +27,14 @@ export type YamllintRuleId = `yamllint/${YamllintRuleName}`;
 export type YamllintRuleName = keyof typeof yamllintRules;
 type FlatConfigRules = NonNullable<Linter.Config["rules"]>;
 
-const eslintPluginRules = yamllintRules as NonNullable<ESLint.Plugin["rules"]> &
-    typeof yamllintRules;
+const eslintPluginRules: typeof yamllintRules = yamllintRules;
 const version =
     typeof packageJson.version === "string" ? packageJson.version : "0.0.0";
 
-const yamllintPlugin: ESLint.Plugin & {
+const yamllintPlugin: {
     configs: YamllintConfigs;
     meta: { name: string; namespace: string; version: string };
+    processors: NonNullable<ESLint.Plugin["processors"]>;
     rules: typeof eslintPluginRules;
 } = {
     configs: {
@@ -48,13 +49,16 @@ const yamllintPlugin: ESLint.Plugin & {
     processors: {},
     rules: eslintPluginRules,
 };
+const yamllintPluginForEslint =
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- ESLint's public Plugin type requires mutable option/config arrays, while this package exposes readonly typed rule metadata internally.
+    yamllintPlugin as unknown as ESLint.Plugin;
 
 const yamllintOnlyPreset: Linter.Config = {
     files: [...bridgeFiles],
 
     languageOptions: { parser: yamlParser },
     name: yamllintConfigMetadataByName.yamllintOnly.presetName,
-    plugins: { [pluginNamespace]: yamllintPlugin },
+    plugins: { [pluginNamespace]: yamllintPluginForEslint },
     rules: { "yamllint/yamllint": "error" },
 };
 
@@ -70,6 +74,16 @@ const configurationRules = {
     "yamllint/sort-yamllint-rule-keys": "warn",
 } as const satisfies FlatConfigRules;
 
+const recommendedConfigurationRules = {
+    "yamllint/disallow-yamllint-conflicting-ignore-keys": "warn",
+    "yamllint/disallow-yamllint-empty-ignore-patterns": "warn",
+    "yamllint/disallow-yamllint-empty-rules-object": "warn",
+    "yamllint/disallow-yamllint-unknown-config-properties": "warn",
+    "yamllint/prefer-yamllint-yaml-files-array": "warn",
+    "yamllint/require-yamllint-config-file-naming-convention": "warn",
+    "yamllint/require-yamllint-rules-object": "warn",
+} as const satisfies FlatConfigRules;
+
 const configurationPreset: Linter.Config = {
     files: [...configFiles],
     languageOptions: {
@@ -77,15 +91,21 @@ const configurationPreset: Linter.Config = {
         parserOptions: { ecmaVersion: "latest", sourceType: "module" },
     },
     name: yamllintConfigMetadataByName.configuration.presetName,
-    plugins: { [pluginNamespace]: yamllintPlugin },
+    plugins: { [pluginNamespace]: yamllintPluginForEslint },
     rules: configurationRules,
+};
+
+const recommendedConfigurationPreset: Linter.Config = {
+    ...configurationPreset,
+    name: yamllintConfigMetadataByName.recommended.presetName,
+    rules: recommendedConfigurationRules,
 };
 
 yamllintPlugin.configs = {
     all: [yamllintOnlyPreset, configurationPreset],
     configs: configurationPreset,
     configuration: configurationPreset,
-    recommended: [yamllintOnlyPreset, configurationPreset],
+    recommended: [yamllintOnlyPreset, recommendedConfigurationPreset],
     yaml: yamllintOnlyPreset,
     yamllintOnly: yamllintOnlyPreset,
 };

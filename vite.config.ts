@@ -14,7 +14,7 @@ const isCiEnvironment = process.env["CI"] === "true";
 const configuredMaxWorkers =
     process.env["MAX_THREADS"] ?? (isCiEnvironment ? "1" : "8");
 /** Parsed integer worker count prior to validation. */
-const parsedMaxWorkers = Number.parseInt(configuredMaxWorkers, 10);
+const parsedMaxWorkers = Math.trunc(Number(configuredMaxWorkers));
 /** Safe positive worker-count used by Vitest thread pool settings. */
 const maxWorkerCount =
     Number.isFinite(parsedMaxWorkers) && parsedMaxWorkers > 0
@@ -22,7 +22,7 @@ const maxWorkerCount =
         : 1;
 /** Raw flag controlling optional hanging-process reporter activation. */
 const rawHangingReporterFlag =
-    process.env["REMARK_VITEST_HANGING_PROCESS_REPORTER"] ??
+    process.env["YAMLLINT_VITEST_HANGING_PROCESS_REPORTER"] ??
     process.env["VITEST_HANGING_PROCESS_REPORTER"] ??
     "false";
 /**
@@ -65,7 +65,7 @@ const typecheckTestFilePatterns = [
 ];
 
 /**
- * Vitest configuration for eslint-plugin-remark.
+ * Vitest configuration for eslint-plugin-yamllint.
  */
 const vitestConfig: ReturnType<typeof defineConfig> = defineConfig({
     cacheDir: "./.cache/vitest",
@@ -135,7 +135,7 @@ const vitestConfig: ReturnType<typeof defineConfig> = defineConfig({
                 "scripts/**",
                 "shared",
                 "shared/test",
-                "src/_internal/remark-worker.ts", // Covered through worker integration; V8 cannot merge worker-thread instrumentation here.
+                "src/_internal/yamllint-worker.ts", // Covered through worker integration; V8 cannot merge worker-thread instrumentation here.
                 "src/**/baseTypes.ts", // Exclude interface-only files that contain only TypeScript interfaces
                 "src/**/types.ts", // Exclude type definition files only in src directory
                 "src/test/**",

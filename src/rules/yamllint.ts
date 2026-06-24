@@ -8,7 +8,7 @@ import {
 import { runYamllintSynchronously } from "../_internal/yamllint-runner.js";
 
 type MessageIds = "yamllintConfigError" | "yamllintProblem";
-type Options = readonly [YamllintRuleOption?];
+type Options = [YamllintRuleOption?];
 type ReportLocation = Readonly<{
     end: { column: number; line: number };
     start: { column: number; line: number };

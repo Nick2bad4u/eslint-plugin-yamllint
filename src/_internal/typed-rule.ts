@@ -82,6 +82,7 @@ const mergeDefaultOptions = <Options extends Readonly<UnknownArray>>(
             mergeOptionValue(defaultOptions[index], configuredOptions[index])
         );
     }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- ESLint exposes options as unknown arrays; this restores the generic rule option tuple after merging defaults.
     return mergedOptions as unknown as Options;
 };
 

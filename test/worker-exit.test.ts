@@ -35,9 +35,7 @@ describe("yamllint worker lifecycle", () => {
             }
         );
 
-        expect(result.error?.message.includes("timed out") === true).toBe(
-            false
-        );
+        expect(result.error).toBeUndefined();
         expect(result.signal).toBeNull();
     }, 30_000);
 });

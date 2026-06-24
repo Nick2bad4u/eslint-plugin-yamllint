@@ -1,0 +1,29 @@
+* text=auto eol=lf
+
+*.ps1 text eol=crlf
+*.psm1 text eol=crlf
+*.psd1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.zip binary
+
+/dist/ linguist-generated=true
+/coverage/ linguist-generated=true
+package-lock.json linguist-generated=true
+
+*.md diff=markdown
+*.json diff=json
+*.css diff=css
+
+CHANGELOG.md merge=union

@@ -2,6 +2,8 @@ import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { format } from "prettier";
+
 import builtPlugin from "../dist/plugin.js";
 
 const presetIndexPath = resolve("docs", "rules", "presets", "index.md");
@@ -57,7 +59,9 @@ const generate = () =>
 export const syncPresetsRulesMatrix = async ({ writeChanges = false } = {}) => {
     const markdown = await readFile(presetIndexPath, "utf8");
     const ending = markdown.includes("\r\n") ? "\r\n" : "\n";
-    const expected = generate().replaceAll("\n", ending).trimEnd();
+    const expected = (await format(generate(), { parser: "markdown" }))
+        .replaceAll("\n", ending)
+        .trimEnd();
     const startOffset = markdown.indexOf("## Rule matrix");
     if (startOffset < 0)
         throw new Error("Preset index is missing the Rule matrix section.");
