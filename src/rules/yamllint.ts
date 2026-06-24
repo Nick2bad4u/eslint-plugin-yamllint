@@ -39,6 +39,12 @@ const toEslintLoc = (
     },
 });
 
+/**
+ * YamllintRule ESLint rule contract.
+ */
+/**
+ * YamllintRule ESLint bridge rule contract.
+ */
 const yamllintRule: RuleModuleWithDocs<MessageIds, Options> = createTypedRule<
     MessageIds,
     Options
@@ -46,25 +52,26 @@ const yamllintRule: RuleModuleWithDocs<MessageIds, Options> = createTypedRule<
     create: (context, [rawOptions = {}]) =>
         toRuleListener({
             Program() {
+                const lintOptions = {
+                    code: context.sourceCode.text,
+                    codeFilename: context.physicalFilename,
+                    cwd: context.cwd,
+                    ...(isDefined(rawOptions.configFile) && {
+                        configFile: rawOptions.configFile,
+                    }),
+                    ...(isDefined(rawOptions.noWarnings) && {
+                        noWarnings: rawOptions.noWarnings,
+                    }),
+                    ...(isDefined(rawOptions.strict) && {
+                        strict: rawOptions.strict,
+                    }),
+                    ...(isDefined(rawOptions.timeoutMs) && {
+                        timeoutMs: rawOptions.timeoutMs,
+                    }),
+                };
                 let lintResult: ReturnType<typeof runYamllintSynchronously>;
                 try {
-                    lintResult = runYamllintSynchronously({
-                        code: context.sourceCode.text,
-                        codeFilename: context.physicalFilename,
-                        cwd: context.cwd,
-                        ...(isDefined(rawOptions.configFile) && {
-                            configFile: rawOptions.configFile,
-                        }),
-                        ...(isDefined(rawOptions.noWarnings) && {
-                            noWarnings: rawOptions.noWarnings,
-                        }),
-                        ...(isDefined(rawOptions.strict) && {
-                            strict: rawOptions.strict,
-                        }),
-                        ...(isDefined(rawOptions.timeoutMs) && {
-                            timeoutMs: rawOptions.timeoutMs,
-                        }),
-                    });
+                    lintResult = runYamllintSynchronously(lintOptions);
                 } catch (error: unknown) {
                     context.report({
                         data: {
@@ -105,7 +112,7 @@ const yamllintRule: RuleModuleWithDocs<MessageIds, Options> = createTypedRule<
                 "yamllint.configs.all",
             ],
             description:
-                "run Yamllint diagnostics against YAML files from ESLint.",
+                "require Yamllint diagnostics against YAML files from ESLint.",
             recommended: true,
             requiresTypeChecking: false,
             url: "https://nick2bad4u.github.io/eslint-plugin-yamllint/docs/rules/yamllint",
@@ -114,7 +121,14 @@ const yamllintRule: RuleModuleWithDocs<MessageIds, Options> = createTypedRule<
             yamllintConfigError: "Yamllint configuration error: {{message}}",
             yamllintProblem: "Yamllint ({{rule}}): {{text}}",
         },
-        schema: [{ additionalProperties: true, type: "object" }],
+        schema: [
+            {
+                additionalProperties: true,
+                description:
+                    "Options forwarded to the underlying bridge linter for this ESLint rule.",
+                type: "object",
+            },
+        ],
         type: "problem",
     },
     name: "yamllint",

@@ -22,6 +22,7 @@ const isRuleModule = (value: unknown): value is RuleWithDocs =>
 describe("yamllint config rules", () => {
     it("registers config-authoring rules with docs metadata", () => {
         expect.hasAssertions();
+        expect(isRuleModule({})).not.toBe(true);
 
         for (const [name, rule] of Object.entries(yamllintPlugin.rules)) {
             if (!isRuleModule(rule)) {

@@ -6,10 +6,12 @@ import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import { themes as prismThemes } from "prism-react-renderer";
 
+// eslint-disable-next-line n/no-process-env -- Docusaurus config reads documented environment variables during site builds.
+const environmentVariables = process.env;
 const baseUrl =
-    globalThis.process.env["DOCUSAURUS_BASE_URL"] ?? "/eslint-plugin-yamllint/";
+    environmentVariables["DOCUSAURUS_BASE_URL"] ?? "/eslint-plugin-yamllint/";
 const enableExperimentalFaster =
-    globalThis.process.env["DOCUSAURUS_ENABLE_EXPERIMENTAL"] === "true";
+    environmentVariables["DOCUSAURUS_ENABLE_EXPERIMENTAL"] === "true";
 
 const organizationName = "Nick2bad4u";
 const projectName = "eslint-plugin-yamllint";
@@ -21,7 +23,8 @@ const projectTagline = "YAML diagnostics inside ESLint.";
 const projectKeywords =
     "eslint, eslint-plugin, yamllint, yaml linting, configuration linting, flat config";
 const socialCardImagePath = "img/logo.png";
-const socialCardImageUrl = new URL(socialCardImagePath, siteUrl).toString();
+const socialCardImage = new URL(socialCardImagePath, siteUrl);
+const socialCardImageUrl = socialCardImage.href;
 const modernEnhancementsClientModule = fileURLToPath(
     new URL("src/js/modern-enhancements.ts", import.meta.url)
 );
@@ -29,12 +32,15 @@ const modernEnhancementsClientModule = fileURLToPath(
 const pwaThemeColor = "#059669";
 const pwaTileColor = "#059669";
 const pwaMaskIconColor = "#059669";
+// eslint-disable-next-line unicorn/prefer-temporal -- The Docusaurus TypeScript target does not expose Temporal types yet.
+const currentDate = new Date();
+const currentYear = currentDate.getUTCFullYear();
 const footerCopyright =
-    `© ${new Date().getFullYear()} ` +
+    `© ${currentYear} ` +
     '<a href="https://github.com/Nick2bad4u/" target="_blank" rel="noopener noreferrer">Nick2bad4u</a> Built with ' +
     '<a href="https://docusaurus.io/" target="_blank" rel="noopener noreferrer">Docusaurus</a>.';
 
-const removeHeadAttrFlagKey = [
+const legacyPostBuildHeadAttributeFlagKey = [
     "remove",
     "Le",
     "gacyPostBuildHeadAttribute",
@@ -60,55 +66,51 @@ const vscodeLanguageServerTypesEsmEntry = resolveOptionalModule(
 );
 
 const suppressKnownWebpackWarningsPlugin: PluginModule = () => ({
-    configureWebpack() {
-        return {
-            ignoreWarnings: [
-                (warning: unknown) => {
-                    const warningMessage =
-                        isRecordLike(warning) &&
-                        typeof warning["message"] === "string"
-                            ? warning["message"]
-                            : undefined;
+    configureWebpack: () => ({
+        ignoreWarnings: [
+            (warning: unknown) => {
+                const warningMessage =
+                    isRecordLike(warning) &&
+                    typeof warning["message"] === "string"
+                        ? warning["message"]
+                        : undefined;
 
-                    return (
-                        typeof warningMessage === "string" &&
-                        warningMessage.includes(
-                            "Critical dependency: require function is used in a way in which dependencies cannot be statically extracted"
-                        )
-                    );
-                },
-            ],
-            resolve: {
-                alias:
-                    vscodeLanguageServerTypesEsmEntry === undefined
-                        ? {}
-                        : {
-                              "vscode-languageserver-types$":
-                                  vscodeLanguageServerTypesEsmEntry,
-                              "vscode-languageserver-types/lib/umd/main.js$":
-                                  vscodeLanguageServerTypesEsmEntry,
-                          },
+                return (
+                    typeof warningMessage === "string" &&
+                    warningMessage.includes(
+                        "Critical dependency: require function is used in a way in which dependencies cannot be statically extracted"
+                    )
+                );
             },
-        };
-    },
+        ],
+        resolve: {
+            alias:
+                vscodeLanguageServerTypesEsmEntry === undefined
+                    ? {}
+                    : {
+                          "vscode-languageserver-types$":
+                              vscodeLanguageServerTypesEsmEntry,
+                          "vscode-languageserver-types/lib/umd/main.js$":
+                              vscodeLanguageServerTypesEsmEntry,
+                      },
+        },
+    }),
     name: "suppress-known-webpack-warnings",
 });
 
 const futureConfig = {
-    ...(enableExperimentalFaster
-        ? {
-              faster: {
-                  mdxCrossCompilerCache: true,
-                  rspackBundler: true,
-                  rspackPersistentCache: true,
-                  ssgWorkerThreads: true,
-              },
-          }
-        : {}),
+    ...(enableExperimentalFaster && {
+        faster: {
+            mdxCrossCompilerCache: true,
+            rspackBundler: true,
+            rspackPersistentCache: true,
+            ssgWorkerThreads: true,
+        },
+    }),
     v4: {
         fasterByDefault: false,
+        [legacyPostBuildHeadAttributeFlagKey]: true,
         mdx1CompatDisabledByDefault: true,
-        [removeHeadAttrFlagKey]: true,
         removeLegacyPostBuildHeadAttribute: true,
         siteStorageNamespacing: true,
         useCssCascadeLayers: false,
@@ -171,6 +173,7 @@ const config = {
         [
             "@docusaurus/plugin-pwa",
             {
+                // eslint-disable-next-line n/no-process-env -- Docusaurus PWA debug validation requires the documented process.env comparison form.
                 debug: process.env["DOCUSAURUS_PWA_DEBUG"] === "true",
                 offlineModeActivationStrategies: [
                     "appInstalled",
@@ -241,9 +244,8 @@ const config = {
             {
                 blog: false,
                 debug:
-                    globalThis.process.env[
-                        "DOCUSAURUS_PRESET_CLASSIC_DEBUG"
-                    ] === "true",
+                    environmentVariables["DOCUSAURUS_PRESET_CLASSIC_DEBUG"] ===
+                    "true",
                 docs: {
                     breadcrumbs: true,
                     editUrl: `https://github.com/${organizationName}/${projectName}/blob/main/docs/docusaurus/`,
@@ -327,7 +329,6 @@ const config = {
                             to: "/docs/rules/getting-started",
                         },
                         { label: "Presets", to: "/docs/rules/presets" },
-                        { label: "Rule Reference", to: "/docs/rules" },
                     ],
                     title: "Explore",
                 },
@@ -357,6 +358,10 @@ const config = {
                         {
                             href: `https://github.com/${organizationName}/${projectName}/issues`,
                             label: "Report Issues",
+                        },
+                        {
+                            href: `https://github.com/${organizationName}/${projectName}/security`,
+                            label: "Security Policy",
                         },
                     ],
                     title: "Support",
@@ -405,7 +410,6 @@ const config = {
                 {
                     activeBaseRegex: "^/docs/rules(?:/(?!presets(?:/|$)).*)?$",
                     items: [
-                        { label: "Rule Reference", to: "/docs/rules" },
                         {
                             label: "Yamllint Bridge",
                             to: "/docs/rules/yamllint",

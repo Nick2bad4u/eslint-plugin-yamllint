@@ -7,15 +7,24 @@ import type { YamllintConfigReference } from "./yamllint-config-references.js";
 
 import { createRuleDocsUrl } from "./rule-docs-url.js";
 
+/**
+ * GenericRuleContext generic rule context contract.
+ */
 export type GenericRuleContext<
     MessageIds extends string,
     Options extends Readonly<UnknownArray>,
 > = Readonly<TSESLint.RuleContext<MessageIds, Options>>;
 
+/**
+ * GenericRuleListener generic rule listener contract.
+ */
 export type GenericRuleListener = Readonly<
     Record<string, (node: unknown) => void>
 >;
 
+/**
+ * RuleDefinitionWithDocs rule definition with docs contract.
+ */
 export type RuleDefinitionWithDocs<
     MessageIds extends string,
     Options extends Readonly<UnknownArray>,
@@ -27,6 +36,9 @@ export type RuleDefinitionWithDocs<
     meta: RuleModuleWithDocs<MessageIds, Options>["meta"];
 };
 
+/**
+ * RuleModuleWithDocs rule module with docs contract.
+ */
 export type RuleModuleWithDocs<
     MessageIds extends string,
     Options extends Readonly<UnknownArray>,
@@ -38,6 +50,9 @@ export type RuleModuleWithDocs<
     name: string;
 };
 
+/**
+ * YamllintRuleDocs yamllint rule docs contract.
+ */
 export type YamllintRuleDocs = Readonly<{
     configs: readonly YamllintConfigReference[] | YamllintConfigReference;
     description: string;
@@ -97,6 +112,9 @@ const getMergedRuleOptions = <Options extends Readonly<UnknownArray>>(
           )
         : configuredOptions;
 
+/**
+ * CreateTypedRule create typed rule contract.
+ */
 export const createTypedRule = <
     MessageIds extends string,
     Options extends Readonly<UnknownArray>,
@@ -120,6 +138,9 @@ export const createTypedRule = <
     };
 };
 
+/**
+ * ToRuleListener to rule listener contract.
+ */
 export const toRuleListener = (
     listener: GenericRuleListener
 ): TSESLint.RuleListener => listener;

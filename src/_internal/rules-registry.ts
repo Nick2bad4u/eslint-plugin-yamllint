@@ -22,6 +22,9 @@ type YamllintRulesRegistry = Readonly<{
     yamllint: typeof yamllintRule;
 }>;
 
+/**
+ * YamllintRules yamllint rules contract.
+ */
 export const yamllintRules: YamllintRulesRegistry = {
     "disallow-yamllint-conflicting-ignore-keys":
         disallowYamllintConflictingIgnoreKeysRule,
@@ -40,6 +43,9 @@ export const yamllintRules: YamllintRulesRegistry = {
     yamllint: yamllintRule,
 } as const satisfies YamllintRulesRegistry;
 
+/**
+ * YamllintRuleNamePattern yamllint rule name pattern contract.
+ */
 export type YamllintRuleNamePattern = keyof typeof yamllintRules;
 
 export default yamllintRules;

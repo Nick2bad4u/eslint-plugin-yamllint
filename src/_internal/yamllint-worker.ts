@@ -1,4 +1,4 @@
-import path from "node:path";
+import * as path from "node:path";
 import { isMainThread, parentPort } from "node:worker_threads";
 import { isDefined } from "ts-extras";
 import {
@@ -58,6 +58,7 @@ const notifyCompletion = (
     request: YamllintWorkerRequest,
     response: YamllintWorkerResponse
 ): void => {
+    // eslint-disable-next-line unicorn/require-post-message-target-origin -- MessagePort from node:worker_threads has no browser targetOrigin parameter.
     request.port.postMessage(response);
     request.port.close();
     const signal = new Int32Array(request.signalBuffer);

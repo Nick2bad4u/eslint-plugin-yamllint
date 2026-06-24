@@ -3,6 +3,11 @@ import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
 const sidebars = {
     rules: [
         {
+            className: "sb-doc-overview",
+            id: "overview",
+            type: "doc",
+        },
+        {
             className: "sb-cat-guides",
             collapsed: false,
             items: [

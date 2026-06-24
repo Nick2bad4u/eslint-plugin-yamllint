@@ -2,6 +2,9 @@ import type { RuleModuleWithDocs } from "../_internal/typed-rule.js";
 
 import { createRequirePropertyRule } from "../_internal/config-rule-factories.js";
 
+/**
+ * DisallowYamllintConflictingIgnoreKeysRule ESLint rule contract.
+ */
 const disallowYamllintConflictingIgnoreKeysRule: RuleModuleWithDocs<
     "configProblem",
     readonly []

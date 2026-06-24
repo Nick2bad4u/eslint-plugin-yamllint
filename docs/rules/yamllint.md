@@ -1,15 +1,97 @@
 # yamllint
 
-run Yamllint diagnostics against YAML files from ESLint.
+Run yamllint through ESLint and surface upstream diagnostics in the same output stream as the rest of the project.
 
-## Rule details
+> **Rule catalog ID:** R010
 
-This rule is part of `eslint-plugin-yamllint` and reports Yamllint bridge or config-authoring diagnostics through ESLint flat config.
+## Targeted pattern scope
+
+This rule targets YAML files and yamllint configuration. Use it in repositories where ESLint is the central feedback surface for local development, CI, and editor diagnostics.
+
+### Matched patterns
+
+- Files matched by the bridge rule or the configuration preset that enables `yamllint/yamllint`.
+- Native yamllint diagnostics returned for project files.
+
+### Detection boundaries
+
+The rule does not reimplement the full yamllint configuration language. It validates the bridge-facing behavior that ESLint can report reliably and leaves deeper domain checks to yamllint.
+
+## What this rule reports
+
+The rule reports diagnostics emitted by yamllint. ESLint receives the original message, location, and severity so editor output stays aligned with the upstream linter.
+
+## Why this rule exists
+
+Bridge plugins are useful only when they preserve upstream behavior and keep configuration reviewable. This rule keeps yamllint feedback close to ESLint without forcing users to copy an entire upstream config into ESLint options.
+
+## ❌ Incorrect
+
+```yaml
+name: CI
+on:
+ push:
+jobs:
+ test:
+  runs-on: ubuntu-latest
+```
+
+## ✅ Correct
+
+```yaml
+name: CI
+on:
+ push:
+jobs:
+ test:
+  runs-on: ubuntu-latest
+```
+
+## Behavior and migration notes
+
+Start with the recommended preset when adopting the plugin. Move project-specific yamllint options into the upstream config file and keep ESLint options limited to file selection, config path, and bridge behavior.
+
+## Additional examples
+
+```js
+import yamllint from "eslint-plugin-yamllint";
+
+export default [
+ yamllint.configs.recommended,
+ {
+  rules: {
+   "yamllint/yamllint": "error",
+  },
+ },
+];
+```
 
 ## ESLint flat config example
 
-```ts
+```js
 import yamllint from "eslint-plugin-yamllint";
 
-export default [...yamllint.configs.recommended];
+export default [yamllint.configs.recommended];
 ```
+
+## When not to use it
+
+Do not enable this rule when yamllint is intentionally run outside ESLint and duplicate editor or CI diagnostics would slow the project down.
+
+## Package documentation
+
+eslint-plugin-yamllint package documentation:
+
+- [Plugin README](https://github.com/Nick2bad4u/eslint-plugin-yamllint#readme)
+- [Rule source](https://github.com/Nick2bad4u/eslint-plugin-yamllint/tree/main/src/rules)
+
+## Further reading
+
+- [yamllint documentation](https://yamllint.readthedocs.io/)
+- [ESLint flat config documentation](https://eslint.org/docs/latest/use/configure/configuration-files)
+
+## Adoption resources
+
+- Enable the recommended preset first.
+- Keep upstream configuration in `.yamllint` unless a rule option explicitly asks for a different file.
+- Run `npm run lint:remark` before publishing docs changes so heading drift is caught locally.

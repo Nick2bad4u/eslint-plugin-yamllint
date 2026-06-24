@@ -1,8 +1,15 @@
-import type { RuleModuleWithDocs } from "./typed-rule.js";
+import type { Except } from "type-fest";
+
+import { isDefined, setHas } from "ts-extras";
+
 import type { YamllintConfigReference } from "./yamllint-config-references.js";
 
 import { createRuleDocsUrl } from "./rule-docs-url.js";
-import { createTypedRule, toRuleListener } from "./typed-rule.js";
+import {
+    createTypedRule,
+    type RuleModuleWithDocs,
+    toRuleListener,
+} from "./typed-rule.js";
 
 type ConfigRuleDefinition = Readonly<{
     check: (sourceText: string, fileName: string) => string | undefined;
@@ -15,34 +22,110 @@ type MessageIds = "configProblem";
 
 type Options = [];
 
-const yamlTopLevelPropertyPattern = /^([A-Za-z][\w-]*)\s*:/gmu;
-const jsObjectPropertyPattern = /(?:^|[,{])\s*([A-Za-z][\w-]*)\s*:/gmu;
+const yamlTopLevelPropertyPattern = /^(?<propertyName>[A-Za-z][\w\-]*)\s*:/gmv;
+const objectPropertyPrefixes = new Set<string>([
+    ",",
+    "{",
+    "}",
+]);
+const whitespaceCharacters = new Set<string>([
+    "\n",
+    "\r",
+    "\t",
+    " ",
+]);
+
+const isAsciiLetter = (character: string): boolean =>
+    (character >= "A" && character <= "Z") ||
+    (character >= "a" && character <= "z");
+
+const isAsciiDigit = (character: string): boolean =>
+    character >= "0" && character <= "9";
+
+const isIdentifierCharacter = (character: string): boolean =>
+    isAsciiLetter(character) ||
+    isAsciiDigit(character) ||
+    character === "-" ||
+    character === "_";
+
+const isWhitespace = (character: string): boolean =>
+    setHas(whitespaceCharacters, character);
+
+const isObjectPropertyPrefix = (character: string | undefined): boolean =>
+    !isDefined(character) || setHas(objectPropertyPrefixes, character);
+
+const hasPropertyIn = (
+    properties: readonly string[],
+    propertyName: string
+): boolean => setHas(new Set(properties), propertyName);
+
+const hasAllowedProperty = (
+    allowedProperties: ReadonlySet<string>,
+    propertyName: string
+): boolean => setHas(allowedProperties, propertyName);
+
+const collectJsObjectPropertyMatches = (sourceText: string): string[] => {
+    const properties: string[] = [];
+    let searchFrom = 0;
+    let colonIndex = sourceText.indexOf(":", searchFrom);
+    while (colonIndex !== -1) {
+        let propertyEnd = colonIndex;
+        while (
+            propertyEnd > 0 &&
+            isWhitespace(sourceText.charAt(propertyEnd - 1))
+        ) {
+            propertyEnd -= 1;
+        }
+        let propertyStart = propertyEnd;
+        while (
+            propertyStart > 0 &&
+            isIdentifierCharacter(sourceText.charAt(propertyStart - 1))
+        ) {
+            propertyStart -= 1;
+        }
+        const propertyName = sourceText.slice(propertyStart, propertyEnd);
+        const prefix = sourceText.slice(0, propertyStart).trimEnd().at(-1);
+        if (
+            propertyName.length > 0 &&
+            isAsciiLetter(propertyName.charAt(0)) &&
+            isObjectPropertyPrefix(prefix)
+        ) {
+            properties.push(propertyName);
+        }
+        searchFrom = colonIndex + 1;
+        colonIndex = sourceText.indexOf(":", searchFrom);
+    }
+    return properties;
+};
 
 const collectPropertyMatches = (
     sourceText: string,
     syntax: "js" | "yaml"
 ): string[] => {
-    const matches = sourceText.matchAll(
-        syntax === "yaml"
-            ? yamlTopLevelPropertyPattern
-            : jsObjectPropertyPattern
-    );
+    if (syntax === "js") return collectJsObjectPropertyMatches(sourceText);
+    const matches = sourceText.matchAll(yamlTopLevelPropertyPattern);
     const properties: string[] = [];
     for (const match of matches) {
-        const propertyName = match[1];
+        const propertyName = match.groups?.["propertyName"];
         if (typeof propertyName === "string") properties.push(propertyName);
     }
     return properties;
 };
 
+/**
+ * HasConfigProperty has config property contract.
+ */
 export const hasConfigProperty = (
     sourceText: string,
     propertyName: string
 ): boolean =>
-    collectPropertyMatches(sourceText, "yaml").includes(propertyName) ||
-    collectPropertyMatches(sourceText, "js").includes(propertyName) ||
+    hasPropertyIn(collectPropertyMatches(sourceText, "yaml"), propertyName) ||
+    hasPropertyIn(collectPropertyMatches(sourceText, "js"), propertyName) ||
     sourceText.includes(`"${propertyName}"`);
 
+/**
+ * CreateConfigTextRule create config text rule contract.
+ */
 export function createConfigTextRule(
     definition: ConfigRuleDefinition
 ): RuleModuleWithDocs<MessageIds, Options> {
@@ -84,20 +167,28 @@ export function createConfigTextRule(
     });
 }
 
+/**
+ * CreateRequirePropertyRule create require property rule contract.
+ */
 export const createRequirePropertyRule = (
-    definition: Omit<ConfigRuleDefinition, "check"> &
+    definition: Except<ConfigRuleDefinition, "check"> &
         Readonly<{ propertyName: string }>
 ): RuleModuleWithDocs<MessageIds, Options> =>
     createConfigTextRule({
         ...definition,
-        check: (sourceText) =>
-            hasConfigProperty(sourceText, definition.propertyName)
-                ? undefined
-                : `Expected this config to define '${definition.propertyName}'.`,
+        check: (sourceText) => {
+            if (hasConfigProperty(sourceText, definition.propertyName)) {
+                return undefined;
+            }
+            return `Expected this config to define '${definition.propertyName}'.`;
+        },
     });
 
+/**
+ * CreateFilenameRule create filename rule contract.
+ */
 export const createFilenameRule = (
-    definition: Omit<ConfigRuleDefinition, "check"> &
+    definition: Except<ConfigRuleDefinition, "check"> &
         Readonly<{ allowedPattern: RegExp }>
 ): RuleModuleWithDocs<MessageIds, Options> =>
     createConfigTextRule({
@@ -108,26 +199,34 @@ export const createFilenameRule = (
                 : "Expected this config file to use a supported filename for this tool.",
     });
 
+/**
+ * CreateUnknownPropertiesRule create unknown properties rule contract.
+ */
 export const createUnknownPropertiesRule = (
-    definition: Omit<ConfigRuleDefinition, "check"> &
+    definition: Except<ConfigRuleDefinition, "check"> &
         Readonly<{ allowedProperties: readonly string[] }>
 ): RuleModuleWithDocs<MessageIds, Options> =>
     createConfigTextRule({
         ...definition,
         check: (sourceText) => {
-            const known = new Set(definition.allowedProperties);
             const properties = collectPropertyMatches(sourceText, "yaml");
-            const unknown = properties.find(
-                (propertyName) => !known.has(propertyName)
+            const allowedProperties = new Set<string>(
+                definition.allowedProperties
             );
-            return typeof unknown === "string"
-                ? `Unexpected top-level config property '${unknown}'.`
-                : undefined;
+            const unknown = properties.find(
+                (propertyName) =>
+                    !hasAllowedProperty(allowedProperties, propertyName)
+            );
+            if (typeof unknown !== "string") return undefined;
+            return `Unexpected top-level config property '${unknown}'.`;
         },
     });
 
+/**
+ * CreateNoEmptyStringRule create no empty string rule contract.
+ */
 export const createNoEmptyStringRule = (
-    definition: Omit<ConfigRuleDefinition, "check">
+    definition: Except<ConfigRuleDefinition, "check">
 ): RuleModuleWithDocs<MessageIds, Options> =>
     createConfigTextRule({
         ...definition,

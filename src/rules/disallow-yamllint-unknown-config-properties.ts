@@ -2,6 +2,9 @@ import type { RuleModuleWithDocs } from "../_internal/typed-rule.js";
 
 import { createUnknownPropertiesRule } from "../_internal/config-rule-factories.js";
 
+/**
+ * DisallowYamllintUnknownConfigPropertiesRule ESLint rule contract.
+ */
 const disallowYamllintUnknownConfigPropertiesRule: RuleModuleWithDocs<
     "configProblem",
     readonly []

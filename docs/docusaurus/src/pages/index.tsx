@@ -1,3 +1,4 @@
+/* eslint-disable canonical/filename-no-index -- Docusaurus requires src/pages/index.tsx for the site homepage route. */
 import type { JSX } from "react";
 
 import Head from "@docusaurus/Head";
@@ -6,7 +7,7 @@ import useBaseUrl from "@docusaurus/useBaseUrl";
 import Heading from "@theme/Heading";
 import Layout from "@theme/Layout";
 
-import GitHubStats from "../components/GitHubStats";
+import GitHubStats from "../components/git-hub-stats";
 import styles from "./index.module.css";
 
 interface HeroBadge {
@@ -225,3 +226,5 @@ export default function Home(): JSX.Element {
         </Layout>
     );
 }
+
+/* eslint-enable canonical/filename-no-index -- Re-enable after Docusaurus homepage module. */

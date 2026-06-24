@@ -2,6 +2,9 @@ import type { ArrayValues } from "type-fest";
 
 import { objectHasOwn } from "ts-extras";
 
+/**
+ * YamllintConfigNames yamllint config names contract.
+ */
 export const yamllintConfigNames = [
     "all",
     "configs",
@@ -11,14 +14,23 @@ export const yamllintConfigNames = [
     "yamllintOnly",
 ] as const;
 
+/**
+ * YamllintConfigMetadata yamllint config metadata contract.
+ */
 export type YamllintConfigMetadata = Readonly<{
     icon: string;
     presetName: `yamllint:${YamllintConfigName}`;
     readmeOrder: number;
 }>;
 
+/**
+ * YamllintConfigName yamllint config name contract.
+ */
 export type YamllintConfigName = ArrayValues<typeof yamllintConfigNames>;
 
+/**
+ * YamllintConfigMetadataByName yamllint config metadata by name contract.
+ */
 export const yamllintConfigMetadataByName: Readonly<
     Record<YamllintConfigName, YamllintConfigMetadata>
 > = {
@@ -42,6 +54,10 @@ export const yamllintConfigMetadataByName: Readonly<
     },
 };
 
+/**
+ * YamllintConfigNamesByReadmeOrder yamllint config names by readme order
+ * contract.
+ */
 export const yamllintConfigNamesByReadmeOrder: readonly YamllintConfigName[] = [
     "recommended",
     "yamllintOnly",
@@ -49,6 +65,9 @@ export const yamllintConfigNamesByReadmeOrder: readonly YamllintConfigName[] = [
     "all",
 ];
 
+/**
+ * YamllintConfigReferenceToName yamllint config reference to name contract.
+ */
 export const yamllintConfigReferenceToName = {
     "yamllint.configs.all": "all",
     "yamllint.configs.configs": "configuration",
@@ -58,9 +77,15 @@ export const yamllintConfigReferenceToName = {
     "yamllint.configs.yamllintOnly": "yamllintOnly",
 } as const;
 
+/**
+ * YamllintConfigReference yamllint config reference contract.
+ */
 export type YamllintConfigReference =
     keyof typeof yamllintConfigReferenceToName;
 
+/**
+ * IsYamllintConfigReference is yamllint config reference contract.
+ */
 export const isYamllintConfigReference = (
     value: string
 ): value is YamllintConfigReference =>

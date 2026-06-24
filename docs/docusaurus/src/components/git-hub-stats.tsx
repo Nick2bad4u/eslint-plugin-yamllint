@@ -2,7 +2,7 @@ import type { JSX } from "react";
 
 import Link from "@docusaurus/Link";
 
-import styles from "./GitHubStats.module.css";
+import styles from "./git-hub-stats.module.css";
 
 interface GitHubStatsProps {
     readonly className?: string;

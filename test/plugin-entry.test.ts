@@ -11,6 +11,8 @@ const packageJson = requireFromTestModule("../package.json") as {
 
 describe("plugin entry module", () => {
     it("exports the default plugin object with rule and config registries", () => {
+        expect.assertions(3);
+
         expect(yamllintPlugin.meta).toStrictEqual(
             expect.objectContaining({
                 name: "eslint-plugin-yamllint",
@@ -19,9 +21,12 @@ describe("plugin entry module", () => {
             })
         );
         expect(Object.keys(yamllintPlugin.rules)).toContain("yamllint");
+        expect(yamllintPlugin.rules).not.toHaveProperty("missing-rule");
     });
 
     it("resolves the package through self-reference CJS require", () => {
+        expect.assertions(1);
+
         const runtimePlugin = requireFromTestModule(packageJson.name) as {
             meta?: { name?: string };
         };

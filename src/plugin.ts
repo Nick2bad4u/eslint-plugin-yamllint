@@ -10,6 +10,9 @@ import {
     yamllintConfigMetadataByName,
 } from "./_internal/yamllint-config-references.js";
 
+/**
+ * YamllintConfigName yamllint config name contract.
+ */
 export type YamllintConfigName = InternalYamllintConfigName;
 
 const pluginName = "eslint-plugin-yamllint" as const;
@@ -21,9 +24,21 @@ const configFiles = [
     "**/yamllint.config.{js,cjs,mjs,ts,mts,cts}",
 ] as const;
 
+/**
+ * YamllintConfig yamllint config contract.
+ */
 export type YamllintConfig = Linter.Config | readonly Linter.Config[];
+/**
+ * YamllintConfigs yamllint configs contract.
+ */
 export type YamllintConfigs = Record<YamllintConfigName, YamllintConfig>;
+/**
+ * YamllintRuleId yamllint rule id contract.
+ */
 export type YamllintRuleId = `yamllint/${YamllintRuleName}`;
+/**
+ * YamllintRuleName yamllint rule name contract.
+ */
 export type YamllintRuleName = keyof typeof yamllintRules;
 type FlatConfigRules = NonNullable<Linter.Config["rules"]>;
 
@@ -31,6 +46,9 @@ const eslintPluginRules: typeof yamllintRules = yamllintRules;
 const version =
     typeof packageJson.version === "string" ? packageJson.version : "0.0.0";
 
+/**
+ * ESLint plugin object exported by `eslint-plugin-yamllint`.
+ */
 const yamllintPlugin: {
     configs: YamllintConfigs;
     meta: { name: string; namespace: string; version: string };
@@ -110,5 +128,8 @@ yamllintPlugin.configs = {
     yamllintOnly: yamllintOnlyPreset,
 };
 
+/**
+ * YamllintPlugin yamllint plugin contract.
+ */
 export type YamllintPlugin = typeof yamllintPlugin;
 export default yamllintPlugin;
