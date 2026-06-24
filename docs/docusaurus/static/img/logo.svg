@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">eslint-plugin-remark logo</title>
+  <desc id="desc">A stylized Remark markdown bridge mark on a teal, blue, and green gradient background.</desc>
+  <defs>
+    <linearGradient id="bg" x1="64" x2="448" y1="64" y2="448" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0f766e" />
+      <stop offset="0.52" stop-color="#2563eb" />
+      <stop offset="1" stop-color="#111827" />
+    </linearGradient>
+    <linearGradient id="mark" x1="128" x2="384" y1="128" y2="384" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ecfeff" />
+      <stop offset="1" stop-color="#bbf7d0" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)" />
+  <path fill="url(#mark)" d="M126 150c0-18 14-32 32-32h196c18 0 32 14 32 32v212c0 18-14 32-32 32H158c-18 0-32-14-32-32V150Zm54 34v144h34v-82l34 50h16l34-50v82h34V184h-36l-40 60-40-60h-36Z" />
+  <path fill="#d9f99d" d="M369 214h47l-70 84-70-84h47v-52h46v52Z" />
+</svg>

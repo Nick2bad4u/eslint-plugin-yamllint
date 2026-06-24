@@ -1,0 +1,51 @@
+name: "Ci"
+
+on:
+    pull_request:
+    push:
+        branches:
+            - "main"
+
+permissions:
+    contents: "read"
+
+concurrency:
+    group: "${{ github.workflow }}-${{ github.ref }}"
+    cancel-in-progress: true
+
+jobs:
+    test:
+        name: "Test"
+        runs-on: "ubuntu-latest"
+        steps:
+            - name: "Checkout"
+              uses: "actions/checkout@v5"
+
+            - name: "Set up Node.js"
+              uses: "actions/setup-node@v5"
+              with:
+                  node-version-file: ".node-version"
+                  cache: "npm"
+
+            - name: "Install dependencies"
+              run: "npm ci --force"
+
+            - name: "Build"
+              run: "npm run build"
+
+            - name: "Typecheck"
+              run: "npm run typecheck"
+
+            - name: "Test"
+              run: "npm test"
+
+            - name: "Check generated docs tables"
+              run: |
+                  npm run sync:readme-rules-table
+                  npm run sync:presets-rules-matrix
+
+            - name: "Check package"
+              run: "npm run lint:package-check"
+
+            - name: "Pack"
+              run: "npm pack --dry-run"

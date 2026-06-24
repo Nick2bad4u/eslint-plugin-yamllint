@@ -1,0 +1,22 @@
+---
+extends: "node_modules/yamllint-config-nick2bad4u/.yamllint"
+
+ignore: |
+    node_modules/
+    dist/
+    coverage/
+    build/
+    release/
+    .cache/
+    .docusaurus/
+    .stryker-tmp/
+    docs/docusaurus/.docusaurus/
+    docs/docusaurus/build/
+    docs/docusaurus/site-docs/developer/api/
+    docs/docusaurus/static/eslint-inspector/
+    docs/docusaurus/static/remark-inspector/
+
+rules:
+    empty-values: "disable"
+    line-length:
+        max: 300
