@@ -35,6 +35,32 @@ const createEngine = (
     });
 
 describe("yamllint bridge rule", () => {
+    it("accepts valid YAML files without diagnostics", async () => {
+        expect.assertions(1);
+
+        await usingTemporaryDirectory(
+            "yamllint-bridge-clean-",
+            async (temporaryDirectory) => {
+                const configPath = path.join(temporaryDirectory, ".yamllint");
+                writeFileSync(
+                    configPath,
+                    "---\nextends: default\nrules:\n  trailing-spaces: enable\n"
+                );
+                const eslint = createEngine({
+                    configFile: configPath,
+                    noWarnings: false,
+                    strict: false,
+                    timeoutMs: 30_000,
+                });
+                const [result] = await eslint.lintText("---\na: 1\n", {
+                    filePath: "sample.yml",
+                });
+
+                expect(result?.messages).toHaveLength(0);
+            }
+        );
+    }, 30_000);
+
     it("reports Yamllint diagnostics through ESLint", async () => {
         expect.assertions(3);
 
@@ -57,6 +83,22 @@ describe("yamllint bridge rule", () => {
                     expect.any(String)
                 );
             }
+        );
+    }, 30_000);
+
+    it("reports Yamllint execution failures as configuration errors", async () => {
+        expect.assertions(2);
+
+        const eslint = createEngine({
+            configFile: "missing-yamllint-config.yaml",
+        });
+        const [result] = await eslint.lintText("a: 1\n", {
+            filePath: "sample.yml",
+        });
+
+        expect(result?.messages[0]?.ruleId).toBe("yamllint/yamllint");
+        expect(result?.messages[0]?.message).toContain(
+            "Yamllint configuration error"
         );
     }, 30_000);
 });
