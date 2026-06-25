@@ -323,48 +323,48 @@ const config = {
             links: [
                 {
                     items: [
-                        { label: "Overview", to: "/docs/rules/overview" },
+                        { label: "🏁 Overview", to: "/docs/rules/overview" },
                         {
-                            label: "Getting Started",
+                            label: "🚀 Getting Started",
                             to: "/docs/rules/getting-started",
                         },
-                        { label: "Presets", to: "/docs/rules/presets" },
+                        { label: "🛠️ Presets", to: "/docs/rules/presets" },
                     ],
-                    title: "Explore",
+                    title: "📚 Explore",
                 },
                 {
                     items: [
                         {
                             href: `https://github.com/${organizationName}/${projectName}/releases`,
-                            label: "Releases",
+                            label: "\u{EB09} Releases",
                         },
                         {
                             href: `https://nick2bad4u.github.io/${projectName}/eslint-inspector/`,
-                            label: "ESLint Inspector",
+                            label: "\u{E7D2} ESLint Inspector",
                         },
                         {
                             href: `https://www.npmjs.com/package/${projectName}`,
-                            label: "NPM",
+                            label: "\u{E616} NPM",
                         },
                     ],
-                    title: "Project",
+                    title: "📁 Project",
                 },
                 {
                     items: [
                         {
                             href: `https://github.com/${organizationName}/${projectName}`,
-                            label: "GitHub Repository",
+                            label: "\u{EA84} GitHub Repository",
                         },
                         {
                             href: `https://github.com/${organizationName}/${projectName}/issues`,
-                            label: "Report Issues",
+                            label: "\u{F188} Report Issues",
                         },
                         {
                             href: `https://github.com/${organizationName}/${projectName}/security`,
-                            label: "Security Policy",
+                            label: "🛡️ Security Policy",
                         },
                     ],
-                    title: "Support",
+                    title: "⚙️ Support",
                 },
             ],
             logo: {
@@ -388,21 +388,21 @@ const config = {
                 {
                     activeBaseRegex: "^/docs/rules/overview/?$",
                     items: [
-                        { label: "Overview", to: "/docs/rules/overview" },
+                        { label: "• Overview", to: "/docs/rules/overview" },
                         {
-                            label: "Getting Started",
+                            label: "• Getting Started",
                             to: "/docs/rules/getting-started",
                         },
                         {
-                            label: "Bridge Guide",
+                            label: "🧪 Bridge Guide",
                             to: "/docs/rules/guides/yamllint-bridge",
                         },
                         {
-                            label: "Config Authoring",
+                            label: "🔧 Config Authoring",
                             to: "/docs/rules/guides/config-authoring",
                         },
                     ],
-                    label: "Docs",
+                    label: "📚 Docs",
                     position: "left",
                     to: "/docs/rules/overview",
                     type: "dropdown",
@@ -411,12 +411,12 @@ const config = {
                     activeBaseRegex: "^/docs/rules(?:/(?!presets(?:/|$)).*)?$",
                     items: [
                         {
-                            label: "Yamllint Bridge",
+                            label: "🧪 Yamllint Bridge",
                             to: "/docs/rules/yamllint",
                         },
-                        { label: "FAQ", to: "/docs/rules/guides/faq" },
+                        { label: "❓ FAQ", to: "/docs/rules/guides/faq" },
                     ],
-                    label: "Rules",
+                    label: "📜 Rules",
                     position: "left",
                     to: "/docs/rules",
                     type: "dropdown",
@@ -425,24 +425,24 @@ const config = {
                     activeBaseRegex: "^/docs/rules/presets(?:/.*)?$",
                     items: [
                         {
-                            label: "Preset Reference",
+                            label: "• Preset Reference",
                             to: "/docs/rules/presets",
                         },
                         {
-                            label: "Recommended",
+                            label: "🟡 Recommended",
                             to: "/docs/rules/presets/recommended",
                         },
                         {
-                            label: "Yamllint Only",
+                            label: "🧪 Yamllint Only",
                             to: "/docs/rules/presets/yamllint-only",
                         },
                         {
-                            label: "Configuration",
+                            label: "🔧 Configuration",
                             to: "/docs/rules/presets/configuration",
                         },
-                        { label: "All", to: "/docs/rules/presets/all" },
+                        { label: "🟣 All", to: "/docs/rules/presets/all" },
                     ],
-                    label: "Presets",
+                    label: "🛠️ Presets",
                     position: "left",
                     to: "/docs/rules/presets",
                     type: "dropdown",
@@ -452,26 +452,29 @@ const config = {
                     items: [
                         {
                             href: `https://github.com/${organizationName}/${projectName}`,
-                            label: "GitHub",
+                            label: "\u{EA84} GitHub",
                         },
                         {
                             href: `https://www.npmjs.com/package/${projectName}`,
-                            label: "NPM",
+                            label: "\u{E616} NPM",
                         },
                         {
                             href: `https://github.com/${organizationName}/${projectName}/releases`,
-                            label: "Releases",
+                            label: "\u{EB09} Releases",
                         },
                     ],
-                    label: "GitHub",
+                    label: "\u{EA84} GitHub",
                     position: "right",
                     type: "dropdown",
                 },
                 {
                     items: [
-                        { label: "API Reference", to: "/docs/developer/api" },
+                        {
+                            label: "\u{F121} API Reference",
+                            to: "/docs/developer/api",
+                        },
                     ],
-                    label: "Dev",
+                    label: "\u{F121} Dev",
                     position: "right",
                     to: "/docs/developer/api",
                     type: "dropdown",

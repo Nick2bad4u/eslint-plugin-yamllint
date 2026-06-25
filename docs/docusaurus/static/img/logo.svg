@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
-  <title id="title">eslint-plugin-remark logo</title>
-  <desc id="desc">A stylized Remark markdown bridge mark on a teal, blue, and green gradient background.</desc>
+  <title id="title">eslint-plugin-yamllint logo</title>
+  <desc id="desc">A stylized Yamllint YAML bridge mark on a teal, blue, and green gradient background.</desc>
   <defs>
     <linearGradient id="bg" x1="64" x2="448" y1="64" y2="448" gradientUnits="userSpaceOnUse">
       <stop stop-color="#0f766e" />

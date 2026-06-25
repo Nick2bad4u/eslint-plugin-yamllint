@@ -1,6 +1,18 @@
 # Presets
 
-This preset is exported by the plugin.
+`eslint-plugin-yamllint` exposes focused flat-config presets for YAML linting and yamllint config authoring.
+
+- `🟡` [`yamllint.configs.recommended`](./recommended.md) — default rollout path for YAML diagnostics plus common config hygiene.
+- `🧪` [`yamllint.configs.yamllintOnly`](./yamllint-only.md) — bridge-only YAML linting.
+- `🔧` [`yamllint.configs.configuration`](./configuration.md) — config-authoring rules without YAML linting.
+- `🟣` [`yamllint.configs.all`](./all.md) — every current bridge and config-authoring rule.
+
+Legacy aliases remain available for compatibility:
+
+- `yamllint.configs.yaml` → `yamllint.configs.yamllintOnly`
+- `yamllint.configs.configs` → `yamllint.configs.configuration`
+
+Use the preset pages in this section for copy/paste config snippets and rollout notes.
 
 ## Rule matrix
 

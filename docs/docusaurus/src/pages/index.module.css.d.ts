@@ -18,7 +18,6 @@ declare const styles: {
     readonly heroKicker: string;
     readonly heroLiveBadges: string;
     readonly heroPanel: string;
-    readonly heroPanelDetails: string;
     readonly heroPanelLogo: string;
     readonly heroStatCard: string;
     readonly heroStatDescription: string;

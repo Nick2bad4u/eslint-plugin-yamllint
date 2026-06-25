@@ -5,6 +5,7 @@ const sidebars = {
         {
             className: "sb-doc-overview",
             id: "overview",
+            label: "🏁 Overview",
             type: "doc",
         },
         {
@@ -17,7 +18,7 @@ const sidebars = {
                 "guides/config-authoring",
                 "guides/faq",
             ],
-            label: "Guides",
+            label: "📚 Guides",
             type: "category",
         },
         {
@@ -27,25 +28,29 @@ const sidebars = {
                 {
                     className: "sb-preset-recommended",
                     id: "presets/recommended",
+                    label: "🟡 Recommended",
                     type: "doc",
                 },
                 {
                     className: "sb-preset-only",
                     id: "presets/yamllint-only",
+                    label: "🧪 Yamllint bridge only",
                     type: "doc",
                 },
                 {
                     className: "sb-preset-configuration",
                     id: "presets/configuration",
+                    label: "🔧 Configuration",
                     type: "doc",
                 },
                 {
                     className: "sb-preset-all",
                     id: "presets/all",
+                    label: "🟣 All",
                     type: "doc",
                 },
             ],
-            label: "Presets",
+            label: "🛠️ Presets",
             link: { id: "presets/index", type: "doc" },
             type: "category",
         },
@@ -64,7 +69,7 @@ const sidebars = {
                 "require-yamllint-valid-rule-levels",
                 "sort-yamllint-rule-keys",
             ],
-            label: "Rules",
+            label: "📜 Rules",
             link: {
                 slug: "/",
                 title: "Rule Reference",

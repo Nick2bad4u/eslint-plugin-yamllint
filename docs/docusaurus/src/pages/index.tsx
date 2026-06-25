@@ -176,11 +176,6 @@ export default function Home(): JSX.Element {
                                 src={logoSrc}
                                 width="240"
                             />
-                            <div className={styles.heroPanelDetails}>
-                                <span>.yamllint</span>
-                                <span>yamllint/yamllint</span>
-                                <span>yamllintOnly</span>
-                            </div>
                         </aside>
                     </div>
 

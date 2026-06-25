@@ -123,7 +123,6 @@
     margin: 0;
     backdrop-filter: blur(10px);
     background: rgb(15 23 42 / 32%);
-    gap: 0.9rem;
     min-block-size: 14rem;
 }
 
@@ -132,25 +131,6 @@
     block-size: auto;
     filter: drop-shadow(0 12px 18px rgb(15 23 42 / 45%));
     inline-size: clamp(10rem, 21vi, 15rem);
-}
-
-.heroPanelDetails {
-    display: grid;
-    width: 100%;
-    gap: 0.42rem;
-}
-
-.heroPanelDetails span {
-    overflow: hidden;
-    padding: 0.4rem 0.52rem;
-    border: 1px solid rgb(255 255 255 / 16%);
-    border-radius: 0.38rem;
-    background: rgb(2 6 23 / 32%);
-    color: rgb(226 232 240);
-    font-family: var(--ifm-font-family-monospace);
-    font-size: 0.76rem;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .heroLiveBadges {
