@@ -1,17 +1,18 @@
 :root {
     --ifm-color-primary: #059669;
-    --ifm-color-primary-dark: #1d4ed8;
-    --ifm-color-primary-darker: #1e40af;
-    --ifm-color-primary-darkest: #1e3a8a;
-    --ifm-color-primary-light: #3b82f6;
-    --ifm-color-primary-lighter: #60a5fa;
-    --ifm-color-primary-lightest: #93c5fd;
+    --ifm-color-primary-dark: #047857;
+    --ifm-color-primary-darker: #065f46;
+    --ifm-color-primary-darkest: #064e3b;
+    --ifm-color-primary-light: #10b981;
+    --ifm-color-primary-lighter: #34d399;
+    --ifm-color-primary-lightest: #a7f3d0;
     --ifm-code-font-size: 95%;
     --ifm-font-family-base:
         Inter, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont,
         sans-serif;
     --sb-accent-overview: #22c55e;
     --sb-accent-started: #0ea5e9;
+    --sb-accent-guides: #059669;
     --sb-accent-developer: #8b5cf6;
     --sb-accent-rules: #f97316;
     --sb-accent-presets: #eab308;
@@ -25,13 +26,13 @@
 }
 
 [data-theme="dark"] {
-    --ifm-color-primary: #93c5fd;
-    --ifm-color-primary-dark: #60a5fa;
-    --ifm-color-primary-darker: #3b82f6;
-    --ifm-color-primary-darkest: #2563eb;
-    --ifm-color-primary-light: #bfdbfe;
-    --ifm-color-primary-lighter: #dbeafe;
-    --ifm-color-primary-lightest: #eff6ff;
+    --ifm-color-primary: #6ee7b7;
+    --ifm-color-primary-dark: #34d399;
+    --ifm-color-primary-darker: #10b981;
+    --ifm-color-primary-darkest: #059669;
+    --ifm-color-primary-light: #a7f3d0;
+    --ifm-color-primary-lighter: #d1fae5;
+    --ifm-color-primary-lightest: #ecfdf5;
     --sb-prefix-rule-number: #a1a1aa;
 }
 
@@ -81,6 +82,10 @@
     border-inline-start-color: var(--sb-accent-started);
 }
 
+.sb-cat-guides > .menu__list-item-collapsible .menu__link {
+    border-inline-start-color: var(--sb-accent-guides);
+}
+
 .sb-cat-developer > .menu__list-item-collapsible .menu__link {
     border-inline-start-color: var(--sb-accent-developer);
 }
@@ -121,6 +126,40 @@
     border-inline-start-color: var(--sb-preset-all);
 }
 
+.sb-cat-rules
+    .theme-doc-sidebar-item-link-level-2:nth-child(6n + 1)
+    > .menu__link {
+    border-inline-start-color: #059669;
+}
+
+.sb-cat-rules
+    .theme-doc-sidebar-item-link-level-2:nth-child(6n + 2)
+    > .menu__link {
+    border-inline-start-color: #0ea5e9;
+}
+
+.sb-cat-rules
+    .theme-doc-sidebar-item-link-level-2:nth-child(6n + 3)
+    > .menu__link {
+    border-inline-start-color: #8b5cf6;
+}
+
+.sb-cat-rules
+    .theme-doc-sidebar-item-link-level-2:nth-child(6n + 4)
+    > .menu__link {
+    border-inline-start-color: #f97316;
+}
+
+.sb-cat-rules
+    .theme-doc-sidebar-item-link-level-2:nth-child(6n + 5)
+    > .menu__link {
+    border-inline-start-color: #eab308;
+}
+
+.sb-cat-rules .theme-doc-sidebar-item-link-level-2:nth-child(6n) > .menu__link {
+    border-inline-start-color: #f43f5e;
+}
+
 .sb-inline-rule-number,
 .sb-inline-runtime-kind {
     font-weight: 650;
@@ -146,11 +185,11 @@
 }
 
 .token.jsdoc-tag {
-    color: #2563eb;
+    color: #059669;
     font-style: normal;
     font-weight: 700;
 }
 
 [data-theme="dark"] .token.jsdoc-tag {
-    color: #93c5fd;
+    color: #6ee7b7;
 }

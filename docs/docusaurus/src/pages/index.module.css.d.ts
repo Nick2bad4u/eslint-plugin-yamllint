@@ -1,7 +1,10 @@
 declare const styles: {
     readonly card: string;
+    readonly cardBullets: string;
     readonly cardDescription: string;
     readonly cardGrid: string;
+    readonly cardHeader: string;
+    readonly cardIcon: string;
     readonly cardLink: string;
     readonly cardTitle: string;
     readonly heroActionButton: string;

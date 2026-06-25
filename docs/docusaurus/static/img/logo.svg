@@ -1,18 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
   <title id="title">eslint-plugin-yamllint logo</title>
-  <desc id="desc">A stylized Yamllint YAML bridge mark on a teal, blue, and green gradient background.</desc>
+  <desc id="desc">A YAML document with checked rule rows on a green and teal gradient background.</desc>
   <defs>
     <linearGradient id="bg" x1="64" x2="448" y1="64" y2="448" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0f766e" />
-      <stop offset="0.52" stop-color="#2563eb" />
-      <stop offset="1" stop-color="#111827" />
+      <stop stop-color="#10231f" />
+      <stop offset="0.5" stop-color="#059669" />
+      <stop offset="1" stop-color="#164e63" />
     </linearGradient>
-    <linearGradient id="mark" x1="128" x2="384" y1="128" y2="384" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#ecfeff" />
-      <stop offset="1" stop-color="#bbf7d0" />
-    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#0f172a" flood-opacity="0.32" />
+    </filter>
   </defs>
   <rect width="512" height="512" rx="112" fill="url(#bg)" />
-  <path fill="url(#mark)" d="M126 150c0-18 14-32 32-32h196c18 0 32 14 32 32v212c0 18-14 32-32 32H158c-18 0-32-14-32-32V150Zm54 34v144h34v-82l34 50h16l34-50v82h34V184h-36l-40 60-40-60h-36Z" />
-  <path fill="#d9f99d" d="M369 214h47l-70 84-70-84h47v-52h46v52Z" />
+  <g filter="url(#shadow)">
+    <path d="M160 104h150l74 76v228H160V104Z" fill="#ecfdf5" />
+    <path d="M310 104v76h74" fill="#a7f3d0" />
+    <path d="M196 202h84m-84 52h120m-120 52h88" stroke="#047857" stroke-width="20" stroke-linecap="round" />
+    <path d="m318 254 22 22 48-58m-70 88 22 22 48-58" fill="none" stroke="#0ea5e9" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M196 358h58" stroke="#f59e0b" stroke-width="20" stroke-linecap="round" />
+  </g>
 </svg>
