@@ -126,6 +126,45 @@
     border-inline-start-color: var(--sb-preset-all);
 }
 
+.sb-cat-guides .theme-doc-sidebar-item-link-level-2 > .menu__link,
+.sb-cat-presets .menu__list .menu__link,
+.sb-cat-rules .theme-doc-sidebar-item-link-level-2 > .menu__link {
+    border-inline-start: 3px solid transparent;
+    border-radius: 0.42rem;
+    line-height: 1.375;
+    margin-block: 0.08rem;
+    padding-block: 0.28rem;
+    padding-inline-start: calc(var(--ifm-menu-link-padding-horizontal) - 3px);
+    text-wrap: pretty;
+}
+
+.sb-cat-guides .theme-doc-sidebar-item-link-level-2 > .menu__link {
+    border-inline-start-color: var(--sb-accent-guides);
+}
+
+.sb-cat-presets > .menu__list-item-collapsible .menu__link,
+.sb-cat-presets .menu__list .menu__link {
+    border-inline-start-color: var(--sb-accent-presets);
+}
+
+.sb-cat-guides:not(.menu__list-item--collapsed)
+    > .menu__list-item-collapsible
+    .menu__link {
+    box-shadow: inset 0 0 0 1px rgb(5 150 105 / 28%);
+}
+
+.sb-cat-presets:not(.menu__list-item--collapsed)
+    > .menu__list-item-collapsible
+    .menu__link {
+    box-shadow: inset 0 0 0 1px rgb(234 179 8 / 25%);
+}
+
+.sb-cat-rules:not(.menu__list-item--collapsed)
+    > .menu__list-item-collapsible
+    .menu__link {
+    box-shadow: inset 0 0 0 1px rgb(249 115 22 / 28%);
+}
+
 .sb-cat-rules
     .theme-doc-sidebar-item-link-level-2:nth-child(6n + 1)
     > .menu__link {
