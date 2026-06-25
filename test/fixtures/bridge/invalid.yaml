@@ -1,0 +1,2 @@
+---
+name: "this line is intentionally long enough to trip yamllint line-length in fixture coverage without relying on formatter-sensitive trailing spaces"

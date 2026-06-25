@@ -2,11 +2,15 @@ import { ESLint, type Linter } from "eslint";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import * as path from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import yamllintPlugin from "../src/plugin";
 
 const bridgeConfig = yamllintPlugin.configs.yamllintOnly as Linter.Config;
+const fixturesDirectory = fileURLToPath(
+    new URL("fixtures/bridge/", import.meta.url)
+);
 
 const usingTemporaryDirectory = async <Result>(
     prefix: string,
@@ -20,9 +24,11 @@ const usingTemporaryDirectory = async <Result>(
     }
 };
 const createEngine = (
-    ruleOptions: Readonly<Record<string, unknown>> = {}
+    ruleOptions: Readonly<Record<string, unknown>> = {},
+    cwd?: string
 ): ESLint =>
     new ESLint({
+        ...(cwd !== undefined && { cwd }),
         overrideConfig: [
             {
                 ...bridgeConfig,
@@ -59,6 +65,32 @@ describe("yamllint bridge rule", () => {
                 expect(result?.messages).toHaveLength(0);
             }
         );
+    }, 30_000);
+
+    it("lints YAML fixture files from disk with forwarded options", async () => {
+        expect.assertions(3);
+
+        const eslint = createEngine(
+            {
+                configFile: path.join(fixturesDirectory, ".yamllint"),
+                noWarnings: false,
+                strict: false,
+                timeoutMs: 30_000,
+            },
+            fixturesDirectory
+        );
+        const results = await eslint.lintFiles(["invalid.yaml", "valid.yaml"]);
+        const messagesByBasename = new Map(
+            results.map((result) => [
+                path.basename(result.filePath),
+                result.messages,
+            ])
+        );
+        const invalidMessages = messagesByBasename.get("invalid.yaml") ?? [];
+
+        expect(messagesByBasename.get("valid.yaml")).toHaveLength(0);
+        expect(invalidMessages.length).toBeGreaterThan(0);
+        expect(invalidMessages[0]?.ruleId).toBe("yamllint/yamllint");
     }, 30_000);
 
     it("reports Yamllint diagnostics through ESLint", async () => {

@@ -16,5 +16,6 @@
     "name": "eslint-plugin-yamllint Documentation",
     "out": "site-docs/developer/api",
     "readme": "none",
-    "tsconfig": "tsconfig.typedoc.json"
+    "tsconfig": "tsconfig.typedoc.json",
+    "warnOnUnstableDtLink": false
 }

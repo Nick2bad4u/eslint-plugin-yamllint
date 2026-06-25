@@ -40,4 +40,4 @@ jobs:
         name: "Trufflehog Secret Scan"
         permissions:
             contents: "read"
-        uses: "Nick2bad4u/workflow-templates/.github/workflows/reusable-trufflehog-scan.yml@main"
+        uses: "Nick2bad4u/workflow-templates/.github/workflows/reusable-trufflehog-scan.yml@3e36303217a5816132ab04544a25f3bcb7e55e59"

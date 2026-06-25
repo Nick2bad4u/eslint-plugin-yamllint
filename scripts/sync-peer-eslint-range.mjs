@@ -34,11 +34,7 @@ const packageJsonPath = fileURLToPath(
  *
  * @type {readonly string[]}
  */
-const synchronizedPeerDependencyNames = [
-    "eslint",
-    "remark",
-    "typescript",
-];
+const synchronizedPeerDependencyNames = ["eslint", "typescript"];
 
 /**
  * Stable minimum supported peer ranges by dependency.
@@ -47,7 +43,6 @@ const synchronizedPeerDependencyNames = [
  */
 const minimumSupportedPeerRanges = {
     eslint: "^9.0.0",
-    remark: "^15.0.0",
     typescript: "^5.0.0",
 };
 

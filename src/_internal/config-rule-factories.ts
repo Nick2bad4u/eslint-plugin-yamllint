@@ -22,7 +22,7 @@ type MessageIds = "configProblem";
 
 type Options = [];
 
-const yamlTopLevelPropertyPattern = /^(?<propertyName>[A-Za-z][\w\-]*)\s*:/gmv;
+const yamlTopLevelPropertyPattern = /^[A-Za-z][\w\-]*(?=\s*:)/gmv;
 const objectPropertyPrefixes = new Set<string>([
     ",",
     "{",
@@ -106,7 +106,7 @@ const collectPropertyMatches = (
     const matches = sourceText.matchAll(yamlTopLevelPropertyPattern);
     const properties: string[] = [];
     for (const match of matches) {
-        const propertyName = match.groups?.["propertyName"];
+        const propertyName = match[0];
         if (typeof propertyName === "string") properties.push(propertyName);
     }
     return properties;

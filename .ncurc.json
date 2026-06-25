@@ -12,6 +12,7 @@
         "prod",
         "dev",
         "optional",
+        "peer",
         "packageManager"
     ],
     "deprecated": true,
@@ -29,7 +30,7 @@
     ],
     "global": false,
     "install": "never",
-    "interactive": true,
+    "interactive": false,
     "jsonAll": false,
     "jsonDeps": false,
     "jsonUpgraded": false,

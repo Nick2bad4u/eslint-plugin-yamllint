@@ -51,4 +51,4 @@ jobs:
             issues: "read"
             pull-requests: "read"
             checks: "read"
-        uses: "Nick2bad4u/workflow-templates/.github/workflows/reusable-ossf-scorecard.yml@main"
+        uses: "Nick2bad4u/workflow-templates/.github/workflows/reusable-ossf-scorecard.yml@3e36303217a5816132ab04544a25f3bcb7e55e59"
