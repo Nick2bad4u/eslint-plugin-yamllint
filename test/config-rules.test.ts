@@ -29,17 +29,48 @@ const createConfigRuleEngine = (): ESLint =>
         overrideConfig: [
             {
                 ...configRules,
-                files: ["**/*.{yml,yaml}", "**/.yamllint"],
+                files: [
+                    "**/*.{yml,yaml}",
+                    "**/.yamllint",
+                    "**/yamllint.config.{js,cjs,mjs,ts,mts,cts}",
+                ],
             },
         ],
         overrideConfigFile: true,
     });
+const createJsConfigRuleEngine = (): ESLint => {
+    const { languageOptions: _languageOptions, ...baseConfigRules } =
+        configRules;
+    return new ESLint({
+        overrideConfig: [
+            {
+                ...baseConfigRules,
+                files: ["**/yamllint.config.{js,cjs,mjs,ts,mts,cts}"],
+                languageOptions: {
+                    parserOptions: {
+                        ecmaVersion: "latest",
+                        sourceType: "module",
+                    },
+                },
+            },
+        ],
+        overrideConfigFile: true,
+    });
+};
 
 const createTemporaryDirectory = (): string => {
     const temporaryRoot = path.join(process.cwd(), "temp");
     fs.mkdirSync(temporaryRoot, { recursive: true });
     return fs.mkdtempSync(path.join(temporaryRoot, "eslint-plugin-yamllint-"));
 };
+
+const validExtendedConfigText = [
+    "rules:",
+    "  trailing-spaces: enable",
+    "yaml-files:",
+    "  - '*.yaml'",
+    "",
+].join("\n");
 
 describe("yamllint config rules", () => {
     it("registers config-authoring rules with docs metadata", () => {
@@ -156,21 +187,87 @@ describe("yamllint config rules", () => {
             ".yamllint"
         );
         fs.mkdirSync(path.dirname(extendedConfigPath), { recursive: true });
-        fs.writeFileSync(
-            extendedConfigPath,
-            [
-                "rules:",
-                "  trailing-spaces: enable",
-                "yaml-files:",
-                "  - '*.yaml'",
-                "",
-            ].join("\n")
-        );
+        fs.writeFileSync(extendedConfigPath, validExtendedConfigText);
 
         const eslint = createConfigRuleEngine();
         const [result] = await eslint.lintText(
             'extends: "node_modules/yamllint-config-example/.yamllint"\n',
             { filePath: path.join(temporaryDirectory, ".yamllint") }
+        );
+
+        expect(result?.messages).toHaveLength(0);
+    });
+
+    it("accepts configs that inherit required properties from relative path extends", async () => {
+        expect.assertions(1);
+
+        const temporaryDirectory = createTemporaryDirectory();
+        fs.writeFileSync(
+            path.join(temporaryDirectory, "base.yml"),
+            validExtendedConfigText
+        );
+
+        const eslint = createConfigRuleEngine();
+        const [result] = await eslint.lintText(
+            "extends : './base.yml' # shared config\n",
+            { filePath: path.join(temporaryDirectory, ".yamllint") }
+        );
+
+        expect(result?.messages).toHaveLength(0);
+    });
+
+    it("accepts configs that inherit required properties from scoped package extends", async () => {
+        expect.assertions(1);
+
+        const temporaryDirectory = createTemporaryDirectory();
+        const extendedConfigPath = path.join(
+            temporaryDirectory,
+            "node_modules",
+            "@scope",
+            "yamllint-config-example",
+            ".yamllint"
+        );
+        fs.mkdirSync(path.dirname(extendedConfigPath), { recursive: true });
+        fs.writeFileSync(extendedConfigPath, validExtendedConfigText);
+
+        const eslint = createConfigRuleEngine();
+        const [result] = await eslint.lintText(
+            'extends: "@scope/yamllint-config-example/.yamllint"\n',
+            { filePath: path.join(temporaryDirectory, ".yamllint") }
+        );
+
+        expect(result?.messages).toHaveLength(0);
+    });
+
+    it("accepts configs that inherit required properties from absolute path extends", async () => {
+        expect.assertions(1);
+
+        const temporaryDirectory = createTemporaryDirectory();
+        const extendedConfigPath = path.join(temporaryDirectory, "base.yml");
+        fs.writeFileSync(extendedConfigPath, validExtendedConfigText);
+
+        const eslint = createConfigRuleEngine();
+        const [result] = await eslint.lintText(
+            `extends: "${extendedConfigPath.replaceAll("\\", "/")}"\n`,
+            { filePath: path.join(temporaryDirectory, ".yamllint") }
+        );
+
+        expect(result?.messages).toHaveLength(0);
+    });
+
+    it("accepts JavaScript configs that inherit required properties", async () => {
+        expect.assertions(1);
+
+        const temporaryDirectory = createTemporaryDirectory();
+        fs.writeFileSync(
+            path.join(temporaryDirectory, "base.yml"),
+            validExtendedConfigText
+        );
+
+        const eslint = createJsConfigRuleEngine();
+        const [result] = await eslint.lintText(
+            'export default { extends: "./base.yml" };\n',
+            { filePath: path.join(temporaryDirectory, "yamllint.config.mjs") }
         );
 
         expect(result?.messages).toHaveLength(0);
@@ -204,5 +301,60 @@ describe("yamllint config rules", () => {
         expect(ruleIds.has("yamllint/require-yamllint-rules-object")).toBe(
             true
         );
+    });
+
+    it("reports required properties when extends is unresolved or empty", async () => {
+        expect.assertions(2);
+
+        const temporaryDirectory = createTemporaryDirectory();
+        const eslint = createConfigRuleEngine();
+        const [missingResult] = await eslint.lintText(
+            "extends: ./missing.yml\n",
+            { filePath: path.join(temporaryDirectory, ".yamllint") }
+        );
+        const [emptyResult] = await eslint.lintText("extends: ''\n", {
+            filePath: path.join(temporaryDirectory, ".yamllint"),
+        });
+
+        expect(
+            missingResult?.messages.some(
+                (message) =>
+                    message.ruleId === "yamllint/require-yamllint-rules-object"
+            )
+        ).toBe(true);
+        expect(
+            emptyResult?.messages.some(
+                (message) =>
+                    message.ruleId === "yamllint/require-yamllint-rules-object"
+            )
+        ).toBe(true);
+    });
+
+    it("reports required properties when extended configs form a cycle without defining them", async () => {
+        expect.assertions(1);
+
+        const temporaryDirectory = createTemporaryDirectory();
+        const rootConfigPath = path.join(temporaryDirectory, ".yamllint");
+        fs.writeFileSync(
+            rootConfigPath,
+            "extends: ./base.yml\nignore: generated/**\n"
+        );
+        fs.writeFileSync(
+            path.join(temporaryDirectory, "base.yml"),
+            "extends: ./.yamllint\nignore: generated/**\n"
+        );
+
+        const eslint = createConfigRuleEngine();
+        const [result] = await eslint.lintText(
+            fs.readFileSync(rootConfigPath, "utf8"),
+            { filePath: rootConfigPath }
+        );
+
+        expect(
+            result?.messages.some(
+                (message) =>
+                    message.ruleId === "yamllint/require-yamllint-rules-object"
+            )
+        ).toBe(true);
     });
 });
