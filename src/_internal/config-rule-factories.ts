@@ -1,6 +1,9 @@
 import type { Except } from "type-fest";
 
-import { isDefined, setHas } from "ts-extras";
+import * as fs from "node:fs";
+import { createRequire } from "node:module";
+import * as path from "node:path";
+import { isDefined, setHas, stringSplit } from "ts-extras";
 
 import type { YamllintConfigReference } from "./yamllint-config-references.js";
 
@@ -18,10 +21,17 @@ type ConfigRuleDefinition = Readonly<{
     name: string;
     recommended: boolean;
 }>;
+type ExtendedConfigPropertyState = Readonly<{
+    depth: number;
+    visitedFiles: ReadonlySet<string>;
+}>;
 type MessageIds = "configProblem";
 
 type Options = [];
 
+const requireFromThisModule = createRequire(import.meta.url);
+const maxExtendedConfigDepth = 10;
+const builtinYamllintConfigNames = new Set<string>(["default", "relaxed"]);
 const yamlTopLevelPropertyPattern = /^[A-Za-z][\w\-]*(?=\s*:)/gmv;
 const objectPropertyPrefixes = new Set<string>([
     ",",
@@ -63,6 +73,191 @@ const hasAllowedProperty = (
     allowedProperties: ReadonlySet<string>,
     propertyName: string
 ): boolean => setHas(allowedProperties, propertyName);
+
+const isFile = (filePath: string): boolean => {
+    try {
+        // eslint-disable-next-line n/no-sync, security/detect-non-literal-fs-filename -- ESLint rule visitors are synchronous.
+        return fs.statSync(filePath).isFile();
+    } catch {
+        return false;
+    }
+};
+
+const getYamllintPackageRoot = (): string | undefined => {
+    try {
+        return path.dirname(
+            requireFromThisModule.resolve("yamllint-js/package.json")
+        );
+    } catch {
+        return undefined;
+    }
+};
+
+const getBuiltinYamllintConfigPath = (
+    configName: string
+): string | undefined => {
+    if (!setHas(builtinYamllintConfigNames, configName)) return undefined;
+    const packageRoot = getYamllintPackageRoot();
+    if (!isDefined(packageRoot)) return undefined;
+    const configPath = path.join(
+        packageRoot,
+        "dist",
+        "conf",
+        `${configName}.yaml`
+    );
+    return isFile(configPath) ? configPath : undefined;
+};
+
+const getExistingRealPath = (filePath: string): string | undefined => {
+    try {
+        // eslint-disable-next-line n/no-sync, security/detect-non-literal-fs-filename -- ESLint rule visitors are synchronous.
+        return fs.realpathSync(filePath);
+    } catch {
+        return undefined;
+    }
+};
+
+const getSourceDirectory = (fileName: string): string =>
+    path.dirname(path.resolve(fileName));
+
+const splitPackageRequest = (
+    request: string
+):
+    | Readonly<{ packageName: string; subpathSegments: readonly string[] }>
+    | undefined => {
+    const segments = stringSplit(request.replaceAll("\\", "/"), "/").filter(
+        (segment) => segment.length > 0
+    );
+    const [firstSegment, secondSegment] = segments;
+    if (!isDefined(firstSegment)) return undefined;
+    if (firstSegment.startsWith("@")) {
+        if (!isDefined(secondSegment)) return undefined;
+        return {
+            packageName: `${firstSegment}/${secondSegment}`,
+            subpathSegments: segments.slice(2),
+        };
+    }
+    return {
+        packageName: firstSegment,
+        subpathSegments: segments.slice(1),
+    };
+};
+
+const resolveNodeModuleFile = (
+    request: string,
+    startDirectory: string
+): string | undefined => {
+    const packageRequest = splitPackageRequest(request);
+    if (!isDefined(packageRequest)) return undefined;
+
+    let currentDirectory = path.resolve(startDirectory);
+    while (true) {
+        const candidate = path.join(
+            currentDirectory,
+            "node_modules",
+            packageRequest.packageName,
+            ...packageRequest.subpathSegments
+        );
+        if (isFile(candidate)) return candidate;
+
+        const parentDirectory = path.dirname(currentDirectory);
+        if (parentDirectory === currentDirectory) return undefined;
+        currentDirectory = parentDirectory;
+    }
+};
+
+const resolveExtendedConfigPath = (
+    extendedConfigName: string,
+    sourceFileName: string
+): string | undefined => {
+    const builtinConfigPath = getBuiltinYamllintConfigPath(extendedConfigName);
+    if (isDefined(builtinConfigPath)) return builtinConfigPath;
+
+    const sourceDirectory = getSourceDirectory(sourceFileName);
+    const candidates = [
+        path.isAbsolute(extendedConfigName)
+            ? extendedConfigName
+            : path.resolve(sourceDirectory, extendedConfigName),
+        path.resolve(process.cwd(), extendedConfigName),
+    ];
+    for (const candidate of candidates) {
+        if (isFile(candidate)) return candidate;
+    }
+
+    return resolveNodeModuleFile(extendedConfigName, sourceDirectory);
+};
+
+const parseUnquotedConfigValue = (value: string): string | undefined => {
+    const commentIndex = value.indexOf("#");
+    const unquotedValue =
+        commentIndex === -1 ? value : value.slice(0, commentIndex);
+    const trimmedValue = unquotedValue.trim();
+    return trimmedValue.length > 0 ? trimmedValue : undefined;
+};
+
+const parseQuotedConfigValue = (value: string): string | undefined => {
+    const quote = value.charAt(0);
+    if (quote !== '"' && quote !== "'") return undefined;
+
+    const closingQuoteIndex = value.indexOf(quote, 1);
+    if (closingQuoteIndex === -1) return undefined;
+    const quotedValue = value.slice(1, closingQuoteIndex).trim();
+    return quotedValue.length > 0 ? quotedValue : undefined;
+};
+
+const parseYamlConfigScalar = (value: string): string | undefined => {
+    const trimmedValue = value.trim();
+    return (
+        parseQuotedConfigValue(trimmedValue) ??
+        parseUnquotedConfigValue(trimmedValue)
+    );
+};
+
+const getYamlExtendedConfigName = (sourceText: string): string | undefined => {
+    let lineStart = 0;
+    while (lineStart < sourceText.length) {
+        const lineEndIndex = sourceText.indexOf("\n", lineStart);
+        const lineEnd = lineEndIndex === -1 ? sourceText.length : lineEndIndex;
+        const line = sourceText.slice(lineStart, lineEnd).trimEnd();
+        if (line.startsWith("extends")) {
+            let propertyEnd = "extends".length;
+            while (isWhitespace(line.charAt(propertyEnd))) propertyEnd += 1;
+            if (line.charAt(propertyEnd) === ":") {
+                return parseYamlConfigScalar(line.slice(propertyEnd + 1));
+            }
+        }
+        lineStart = lineEnd + 1;
+    }
+    return undefined;
+};
+
+const getJsObjectPropertyStringValue = (
+    sourceText: string,
+    propertyName: string
+): string | undefined => {
+    let searchFrom = 0;
+    let propertyIndex = sourceText.indexOf(propertyName, searchFrom);
+    while (propertyIndex !== -1) {
+        const prefix = sourceText.slice(0, propertyIndex).trimEnd().at(-1);
+        let propertyEnd = propertyIndex + propertyName.length;
+        while (isWhitespace(sourceText.charAt(propertyEnd))) propertyEnd += 1;
+        if (
+            isObjectPropertyPrefix(prefix) &&
+            sourceText.charAt(propertyEnd) === ":"
+        ) {
+            const rawValue = sourceText.slice(propertyEnd + 1).trimStart();
+            const value = parseQuotedConfigValue(rawValue);
+            if (isDefined(value)) return value;
+        }
+        searchFrom = propertyIndex + propertyName.length;
+        propertyIndex = sourceText.indexOf(propertyName, searchFrom);
+    }
+    return undefined;
+};
+
+const getExtendedConfigName = (sourceText: string): string | undefined =>
+    getYamlExtendedConfigName(sourceText) ??
+    getJsObjectPropertyStringValue(sourceText, "extends");
 
 const collectJsObjectPropertyMatches = (sourceText: string): string[] => {
     const properties: string[] = [];
@@ -123,6 +318,58 @@ export const hasConfigProperty = (
     hasPropertyIn(collectPropertyMatches(sourceText, "js"), propertyName) ||
     sourceText.includes(`"${propertyName}"`);
 
+const hasExtendedConfigProperty = (
+    sourceText: string,
+    sourceFileName: string,
+    propertyName: string,
+    state: ExtendedConfigPropertyState
+): boolean => {
+    if (hasConfigProperty(sourceText, propertyName)) return true;
+    if (state.depth >= maxExtendedConfigDepth) return false;
+
+    const extendedConfigName = getExtendedConfigName(sourceText);
+    if (!isDefined(extendedConfigName)) return false;
+
+    const extendedConfigPath = resolveExtendedConfigPath(
+        extendedConfigName,
+        sourceFileName
+    );
+    if (!isDefined(extendedConfigPath)) return false;
+
+    const realPath = getExistingRealPath(extendedConfigPath);
+    if (!isDefined(realPath) || setHas(state.visitedFiles, realPath)) {
+        return false;
+    }
+
+    let extendedConfigText: string;
+    try {
+        // eslint-disable-next-line n/no-sync, security/detect-non-literal-fs-filename -- ESLint rule visitors are synchronous.
+        extendedConfigText = fs.readFileSync(realPath, "utf8");
+    } catch {
+        return false;
+    }
+
+    return hasExtendedConfigProperty(
+        extendedConfigText,
+        realPath,
+        propertyName,
+        {
+            depth: state.depth + 1,
+            visitedFiles: new Set([...state.visitedFiles, realPath]),
+        }
+    );
+};
+
+const hasConfigOrExtendedConfigProperty = (
+    sourceText: string,
+    sourceFileName: string,
+    propertyName: string
+): boolean =>
+    hasExtendedConfigProperty(sourceText, sourceFileName, propertyName, {
+        depth: 0,
+        visitedFiles: new Set<string>(),
+    });
+
 /**
  * CreateConfigTextRule create config text rule contract.
  */
@@ -176,8 +423,14 @@ export const createRequirePropertyRule = (
 ): RuleModuleWithDocs<MessageIds, Options> =>
     createConfigTextRule({
         ...definition,
-        check: (sourceText) => {
-            if (hasConfigProperty(sourceText, definition.propertyName)) {
+        check: (sourceText, fileName) => {
+            if (
+                hasConfigOrExtendedConfigProperty(
+                    sourceText,
+                    fileName,
+                    definition.propertyName
+                )
+            ) {
                 return undefined;
             }
             return `Expected this config to define '${definition.propertyName}'.`;
