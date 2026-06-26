@@ -75,10 +75,10 @@ const yamllintRule: RuleModuleWithDocs<MessageIds, Options> = createTypedRule<
                 } catch (error: unknown) {
                     context.report({
                         data: {
-                            message:
-                                error instanceof Error
-                                    ? error.message
-                                    : String(error),
+                            // eslint-disable-next-line canonical/no-use-extend-native -- unicorn/prefer-error-is-error requires the native Error.isError guard.
+                            message: Error.isError(error)
+                                ? error.message
+                                : String(error),
                         },
                         loc: {
                             end: { column: 0, line: 1 },

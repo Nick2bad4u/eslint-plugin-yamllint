@@ -39,7 +39,6 @@ const config = [
             "docs/docusaurus/static/*-inspector/**",
             "plugin.*",
             "test/**/*.test-d.ts",
-            "untyped-third-party-modules.d.ts",
         ],
     },
     { ...localConfigurationPreset, name: "Local Yamllint config rules" },

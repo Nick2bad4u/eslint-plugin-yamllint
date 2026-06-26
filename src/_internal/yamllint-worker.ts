@@ -73,17 +73,17 @@ const handleRequest = async (request: YamllintWorkerRequest): Promise<void> => {
             result: await runYamllint(request),
         });
     } catch (error: unknown) {
-        const normalizedError =
-            error instanceof Error
-                ? {
-                      message: error.message,
-                      name: error.name,
-                      ...(isDefined(error.stack) && { stack: error.stack }),
-                  }
-                : {
-                      message: `Unknown Yamllint worker failure: ${String(error)}`,
-                      name: "YamllintWorkerError",
-                  };
+        // eslint-disable-next-line canonical/no-use-extend-native -- unicorn/prefer-error-is-error requires the native Error.isError guard.
+        const normalizedError = Error.isError(error)
+            ? {
+                  message: error.message,
+                  name: error.name,
+                  ...(isDefined(error.stack) && { stack: error.stack }),
+              }
+            : {
+                  message: `Unknown Yamllint worker failure: ${String(error)}`,
+                  name: "YamllintWorkerError",
+              };
         notifyCompletion(request, { error: normalizedError, ok: false });
     }
 };

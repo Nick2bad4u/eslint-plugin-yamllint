@@ -291,42 +291,47 @@ function collectSidebarLinksFromNode(
  * @returns Cleanup callback that removes listeners and indicator markup.
  */
 function createScrollIndicator(): CleanupFunction {
+    if (!CSS.supports("animation-timeline", "scroll()")) {
+        return (): void => {
+            // No-op when scroll-driven animations are not supported.
+        };
+    }
+
+    const style = document.createElement("style");
+    style.textContent = `
+@keyframes yamllint-scroll-progress {
+    from {
+        transform: scaleX(0);
+    }
+
+    to {
+        transform: scaleX(1);
+    }
+}
+`;
+
     const indicator = document.createElement("div");
     indicator.className = "scroll-indicator";
     indicator.style.cssText = [
+        "animation: yamllint-scroll-progress linear both",
+        "animation-timeline: scroll(root block)",
         "position: fixed",
         "inset-block-start: 0",
         "inset-inline-start: 0",
         "z-index: 9999",
         "height: 3px",
-        "width: 0%",
+        "width: 100%",
         "background: linear-gradient(90deg, var(--ifm-color-primary), var(--ifm-color-primary-light))",
         "pointer-events: none",
-        "transition: width 80ms linear",
+        "transform: scaleX(0)",
+        "transform-origin: left center",
     ].join(";");
 
+    document.head.append(style);
     document.body.append(indicator);
 
-    const update = (): void => {
-        const scrollTop =
-            window.pageYOffset || document.documentElement.scrollTop;
-        const docHeight =
-            document.documentElement.scrollHeight - window.innerHeight;
-        const safeHeight = docHeight > 0 ? docHeight : 1;
-        const scrollPercent = (scrollTop / safeHeight) * 100;
-        indicator.style.width = `${Math.max(0, Math.min(100, scrollPercent))}%`;
-    };
-
-    const scrollAbortController = new AbortController();
-    window.addEventListener("scroll", update, {
-        passive: true,
-        signal: scrollAbortController.signal,
-    });
-    update();
-
     return (): void => {
-        window.removeEventListener("scroll", update);
-        scrollAbortController.abort();
+        style.remove();
         indicator.remove();
     };
 }
