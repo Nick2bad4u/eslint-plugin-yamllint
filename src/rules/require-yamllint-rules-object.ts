@@ -3,9 +3,9 @@ import type { RuleModuleWithDocs } from "../_internal/typed-rule.js";
 import { createRequirePropertyRule } from "../_internal/config-rule-factories.js";
 
 /**
- * RequireYamllintRulesObjectRule ESLint rule contract.
+ * YamllintRulesObjectRule ESLint rule contract.
  */
-const requireYamllintRulesObjectRule: RuleModuleWithDocs<
+const yamllintRulesObjectRule: RuleModuleWithDocs<
     "configProblem",
     readonly []
 > = createRequirePropertyRule({
@@ -21,4 +21,4 @@ const requireYamllintRulesObjectRule: RuleModuleWithDocs<
     recommended: true,
 });
 
-export default requireYamllintRulesObjectRule;
+export default yamllintRulesObjectRule;

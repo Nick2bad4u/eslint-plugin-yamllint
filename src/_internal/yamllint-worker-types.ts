@@ -49,8 +49,7 @@ export type YamllintWorkerRequest = Readonly<{
  * YamllintWorkerResponse yamllint worker response contract.
  */
 export type YamllintWorkerResponse =
-    | YamllintWorkerErrorResponse
-    | YamllintWorkerSuccessResponse;
+    YamllintWorkerErrorResponse | YamllintWorkerSuccessResponse;
 /**
  * YamllintWorkerSuccessResponse yamllint worker success response contract.
  */

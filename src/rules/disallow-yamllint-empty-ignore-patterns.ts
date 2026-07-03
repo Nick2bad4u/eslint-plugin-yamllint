@@ -3,9 +3,9 @@ import type { RuleModuleWithDocs } from "../_internal/typed-rule.js";
 import { createNoEmptyStringRule } from "../_internal/config-rule-factories.js";
 
 /**
- * DisallowYamllintEmptyIgnorePatternsRule ESLint rule contract.
+ * YamllintEmptyIgnorePatternsRule ESLint rule contract.
  */
-const disallowYamllintEmptyIgnorePatternsRule: RuleModuleWithDocs<
+const yamllintEmptyIgnorePatternsRule: RuleModuleWithDocs<
     "configProblem",
     readonly []
 > = createNoEmptyStringRule({
@@ -19,4 +19,4 @@ const disallowYamllintEmptyIgnorePatternsRule: RuleModuleWithDocs<
     recommended: true,
 });
 
-export default disallowYamllintEmptyIgnorePatternsRule;
+export default yamllintEmptyIgnorePatternsRule;

@@ -3,9 +3,9 @@ import type { RuleModuleWithDocs } from "../_internal/typed-rule.js";
 import { createFilenameRule } from "../_internal/config-rule-factories.js";
 
 /**
- * RequireYamllintConfigFileNamingConventionRule ESLint rule contract.
+ * YamllintConfigFileNamingConventionRule ESLint rule contract.
  */
-const requireYamllintConfigFileNamingConventionRule: RuleModuleWithDocs<
+const yamllintConfigFileNamingConventionRule: RuleModuleWithDocs<
     "configProblem",
     readonly []
 > = createFilenameRule({
@@ -22,4 +22,4 @@ const requireYamllintConfigFileNamingConventionRule: RuleModuleWithDocs<
     recommended: true,
 });
 
-export default requireYamllintConfigFileNamingConventionRule;
+export default yamllintConfigFileNamingConventionRule;

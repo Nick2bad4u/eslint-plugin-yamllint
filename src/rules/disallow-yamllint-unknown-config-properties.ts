@@ -3,9 +3,9 @@ import type { RuleModuleWithDocs } from "../_internal/typed-rule.js";
 import { createUnknownPropertiesRule } from "../_internal/config-rule-factories.js";
 
 /**
- * DisallowYamllintUnknownConfigPropertiesRule ESLint rule contract.
+ * YamllintUnknownConfigPropertiesRule ESLint rule contract.
  */
-const disallowYamllintUnknownConfigPropertiesRule: RuleModuleWithDocs<
+const yamllintUnknownConfigPropertiesRule: RuleModuleWithDocs<
     "configProblem",
     readonly []
 > = createUnknownPropertiesRule({
@@ -27,4 +27,4 @@ const disallowYamllintUnknownConfigPropertiesRule: RuleModuleWithDocs<
     recommended: true,
 });
 
-export default disallowYamllintUnknownConfigPropertiesRule;
+export default yamllintUnknownConfigPropertiesRule;
