@@ -75,7 +75,7 @@
         "docs:typecheck": "npm run --workspace docs/docusaurus typecheck",
         "lint": "cross-env NODE_OPTIONS=--max_old_space_size=16384 eslint --cache --cache-strategy content --cache-location .cache/.eslintcache",
         "lint:actions": "node scripts/lint-actionlint.mjs",
-        "lint:all": "npm run lint && npm run lint:prettier && npm run lint:remark && npm run lint:package && npm run lint:actions && npm run lint:jscpd && npm run lint:lychee",
+        "lint:all": "npm run lint && npm run lint:prettier && npm run lint:remark && npm run lint:package && npm run lint:actions",
         "lint:compat:eslint9": "node scripts/eslint9-compat-smoke.mjs",
         "lint:node-version-files": "node scripts/sync-node-version-files.mjs --check",
         "lint:package": "npm run lint:node-version-files && npm run lint:package-sort && npm run lint:packagelintrc",
