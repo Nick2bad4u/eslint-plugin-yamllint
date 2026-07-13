@@ -1,6 +1,11 @@
+import sharedConfig from "stylelint-config-nick2bad4u";
+
 /** @type {import("stylelint").Config} */
 const config = {
-    rules: {},
+    ...sharedConfig,
+    rules: {
+        ...sharedConfig.rules,
+    },
 };
 
 export default config;

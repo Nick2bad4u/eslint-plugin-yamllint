@@ -28,6 +28,7 @@ const config = [
     }),
     {
         ignores: [
+            "**/*.css",
             ".github/workflows/**",
             "dist/**",
             "coverage/**",

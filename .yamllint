@@ -12,6 +12,7 @@ ignore: |
     coverage/
     build/
     release/
+    temp/
     .cache/
     .docusaurus/
     .stryker-tmp/

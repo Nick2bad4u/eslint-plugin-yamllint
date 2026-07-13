@@ -12,10 +12,8 @@
     "gitRevision": "main",
     "hostedBaseUrl": "https://nick2bad4u.github.io/eslint-plugin-yamllint/",
     "json": "docs/typedoc.json",
-    "logLevel": "Info",
     "name": "eslint-plugin-yamllint Documentation",
     "out": "site-docs/developer/api",
-    "readme": "none",
     "tsconfig": "tsconfig.typedoc.json",
     "warnOnUnstableDtLink": false
 }
