@@ -208,11 +208,13 @@ jobs:
                   npm_release_url="https://www.npmjs.com/package/${package_name}/v/${version}"
                   github_release_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${tag}"
 
-                  echo "version=$version" >> "$GITHUB_OUTPUT"
-                  echo "tag=$tag" >> "$GITHUB_OUTPUT"
-                  echo "package_name=$package_name" >> "$GITHUB_OUTPUT"
-                  echo "npm_release_url=$npm_release_url" >> "$GITHUB_OUTPUT"
-                  echo "github_release_url=$github_release_url" >> "$GITHUB_OUTPUT"
+                  {
+                    echo "version=$version"
+                    echo "tag=$tag"
+                    echo "package_name=$package_name"
+                    echo "npm_release_url=$npm_release_url"
+                    echo "github_release_url=$github_release_url"
+                  } >> "$GITHUB_OUTPUT"
 
             - name: "Rebuild package after manual version bump"
               if: "github.event_name == 'workflow_dispatch'"
@@ -266,8 +268,40 @@ jobs:
                   git push origin "$TAG"
 
             - name: "Generate release notes from git-cliff"
+              env:
+                  EXPECTED_TAG: "${{ steps.version.outputs.tag }}"
+                  GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
               run: |
                   set -euo pipefail
+
+                  if [ -z "$EXPECTED_TAG" ]; then
+                    echo "::error::The release version step did not provide an expected tag."
+                    exit 1
+                  fi
+
+                  tag_ref="refs/tags/${EXPECTED_TAG}"
+                  if ! git show-ref --verify --quiet "$tag_ref"; then
+                    echo "::error::Expected local tag ${EXPECTED_TAG} does not exist."
+                    exit 1
+                  fi
+
+                  tag_commit=$(git rev-parse "${tag_ref}^{commit}")
+                  head_commit=$(git rev-parse HEAD)
+                  if [ "$tag_commit" != "$head_commit" ]; then
+                    echo "::error::Tag ${EXPECTED_TAG} points to ${tag_commit}, but HEAD is ${head_commit}."
+                    exit 1
+                  fi
+
+                  head_tags=$(git tag --points-at HEAD --sort=refname)
+                  if [ "$head_tags" != "$EXPECTED_TAG" ]; then
+                    displayed_head_tags=${head_tags//$'\n'/, }
+                    if [ -z "$displayed_head_tags" ]; then
+                      displayed_head_tags="(none)"
+                    fi
+                    echo "::error::Expected ${EXPECTED_TAG} to be the only tag at HEAD, but found: ${displayed_head_tags}."
+                    exit 1
+                  fi
+
                   mkdir -p temp
                   npm run --silent changelog:release-notes -- --output "${RELEASE_NOTES_PATH}"
                   if [ ! -s "${RELEASE_NOTES_PATH}" ]; then
@@ -314,10 +348,12 @@ jobs:
                     zip -rq "../release-assets/${zip_basename}.zip" "${zip_basename}"
                   )
 
-                  echo "tarball_path=$tarball_path" >> "$GITHUB_OUTPUT"
-                  echo "zip_path=${assets_dir}/${zip_basename}.zip" >> "$GITHUB_OUTPUT"
-                  echo "tarball_name=$tarball_filename" >> "$GITHUB_OUTPUT"
-                  echo "zip_name=${zip_basename}.zip" >> "$GITHUB_OUTPUT"
+                  {
+                    echo "tarball_path=$tarball_path"
+                    echo "zip_path=${assets_dir}/${zip_basename}.zip"
+                    echo "tarball_name=$tarball_filename"
+                    echo "zip_name=${zip_basename}.zip"
+                  } >> "$GITHUB_OUTPUT"
 
             - name: "Create GitHub release"
               uses: "softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b" # v3.0.1
