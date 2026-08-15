@@ -195,11 +195,17 @@
 }
 
 .card {
+    --card-background: var(--ifm-card-background-color);
+    --card-border: var(--ifm-color-emphasis-200);
+    --card-shadow: var(--ifm-global-shadow-lw);
+    --card-shadow-hover: var(--ifm-global-shadow-md);
+    --card-text: var(--ifm-color-emphasis-800);
+
     padding: 1.08rem;
-    border: 1px solid var(--ifm-color-emphasis-200);
+    border: 1px solid var(--card-border);
     border-radius: 0.5rem;
-    background: var(--ifm-card-background-color);
-    box-shadow: var(--ifm-global-shadow-lw);
+    background: var(--card-background);
+    box-shadow: var(--card-shadow);
     transition:
         transform 140ms ease,
         box-shadow 140ms ease,
@@ -209,7 +215,7 @@
 .card:hover,
 .card:focus {
     border-color: rgb(5 150 105 / 35%);
-    box-shadow: var(--ifm-global-shadow-md);
+    box-shadow: var(--card-shadow-hover);
     transform: translateY(-2px);
 }
 
@@ -242,14 +248,14 @@
 }
 
 .cardDescription {
-    color: var(--ifm-color-emphasis-800);
+    color: var(--card-text);
     margin-block-end: 0.72rem;
 }
 
 .cardBullets {
     padding-inline-start: 1.18rem;
     margin: 0 0 0.9rem;
-    color: var(--ifm-color-emphasis-800);
+    color: var(--card-text);
     font-size: 0.89rem;
     line-height: 1.48;
 }

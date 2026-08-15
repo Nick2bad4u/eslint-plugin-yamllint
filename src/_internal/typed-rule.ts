@@ -28,12 +28,18 @@ export type GenericRuleListener = Readonly<
 export type RuleDefinitionWithDocs<
     MessageIds extends string,
     Options extends Readonly<UnknownArray>,
-> = Except<RuleModuleWithDocs<MessageIds, Options>, "create" | "meta"> & {
+> = Except<
+    TSESLint.RuleModule<MessageIds, Options>,
+    | "create"
+    | "meta"
+    | "name"
+> & {
     create: (
         context: GenericRuleContext<MessageIds, Options>,
         options: Options
     ) => TSESLint.RuleListener;
-    meta: RuleModuleWithDocs<MessageIds, Options>["meta"];
+    meta: YamllintRuleMetadata<MessageIds, Options>;
+    name: string;
 };
 
 /**
@@ -42,11 +48,8 @@ export type RuleDefinitionWithDocs<
 export type RuleModuleWithDocs<
     MessageIds extends string,
     Options extends Readonly<UnknownArray>,
-> = TSESLint.RuleModule<MessageIds, Options> & {
-    meta: TSESLint.RuleMetaData<MessageIds, YamllintRuleDocs, Options> & {
-        deprecated: boolean;
-        docs: YamllintRuleDocs;
-    };
+> = Except<TSESLint.RuleModule<MessageIds, Options>, "meta" | "name"> & {
+    meta: YamllintRuleMetadata<MessageIds, Options>;
     name: string;
 };
 
@@ -61,6 +64,15 @@ export type YamllintRuleDocs = Readonly<{
     requiresTypeChecking: boolean;
     url: string;
 }>;
+
+type YamllintRuleMetadata<
+    MessageIds extends string,
+    Options extends Readonly<UnknownArray>,
+> = TSESLint.RuleMetaData<MessageIds, YamllintRuleDocs, Options> & {
+    deprecated: boolean;
+    docs: YamllintRuleDocs;
+    languages: readonly ["js/js"];
+};
 
 const isReadonlyRecord = (value: unknown): value is Readonly<UnknownRecord> =>
     typeof value === "object" && value !== null && !Array.isArray(value);
@@ -114,6 +126,9 @@ const getMergedRuleOptions = <Options extends Readonly<UnknownArray>>(
 
 /**
  * CreateTypedRule create typed rule contract.
+ *
+ * @throws A `TypeError` when the rule metadata does not use its canonical docs
+ *   URL.
  */
 export const createTypedRule = <
     MessageIds extends string,

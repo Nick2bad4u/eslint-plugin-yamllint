@@ -1,8 +1,9 @@
-import { ESLint } from "eslint";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { rm } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import pc from "picocolors";
 
 /** @typedef {import("eslint").Linter.Config} FlatConfig */
@@ -38,6 +39,20 @@ const getExpectedEslintMajor = (argv) => {
     return parsedMajor;
 };
 
+/** @param {readonly string[]} argv */
+const getPackageRoot = (argv) => {
+    const packageRootFlag = argv.find((argument) =>
+        argument.startsWith("--package-root=")
+    );
+    if (packageRootFlag === undefined) return process.cwd();
+
+    const rawPackageRoot = packageRootFlag.slice("--package-root=".length);
+    if (rawPackageRoot.length === 0) {
+        throw new TypeError("--package-root must identify a directory.");
+    }
+    return resolve(rawPackageRoot);
+};
+
 /** @param {string} version */
 const getEslintMajorVersion = (version) => {
     const [majorText = "0"] = version.split(".");
@@ -69,11 +84,31 @@ const getSingleFlatConfig = (pluginConfigs, configName) => {
     return /** @type {FlatConfig} */ (configValue);
 };
 
-/** @returns {Promise<PluginConfigs>} */
-const loadPluginConfigs = async () => {
-    const pluginModule = await import("../plugin.mjs");
+/**
+ * @param {string} packageRoot
+ *
+ * @returns {Promise<{
+ *     ESLint: typeof import("eslint").ESLint;
+ *     pluginConfigs: PluginConfigs;
+ * }>}
+ */
+const loadPackageRuntime = async (packageRoot) => {
+    const requireFromPackage = createRequire(join(packageRoot, "package.json"));
+    const eslintModuleUrl = pathToFileURL(
+        requireFromPackage.resolve("eslint")
+    ).href;
+    const pluginModuleUrl = pathToFileURL(
+        requireFromPackage.resolve("eslint-plugin-yamllint")
+    ).href;
+    const eslintModule = /** @type {typeof import("eslint")} */ (
+        await import(eslintModuleUrl)
+    );
+    const pluginModule = await import(pluginModuleUrl);
     const pluginValue = pluginModule.default;
-    return /** @type {PluginConfigs} */ (pluginValue.configs ?? {});
+    return {
+        ESLint: eslintModule.ESLint,
+        pluginConfigs: /** @type {PluginConfigs} */ (pluginValue.configs ?? {}),
+    };
 };
 
 /**
@@ -88,7 +123,10 @@ const assertDiagnostic = (result, ruleId, label) => {
 };
 
 const run = async () => {
-    const expectedEslintMajor = getExpectedEslintMajor(process.argv.slice(2));
+    const commandArguments = process.argv.slice(2);
+    const expectedEslintMajor = getExpectedEslintMajor(commandArguments);
+    const packageRoot = getPackageRoot(commandArguments);
+    const { ESLint, pluginConfigs } = await loadPackageRuntime(packageRoot);
     const installedEslintMajor = getEslintMajorVersion(ESLint.version);
 
     if (
@@ -100,7 +138,6 @@ const run = async () => {
         );
     }
 
-    const pluginConfigs = await loadPluginConfigs();
     const temporaryDirectory = mkdtempSync(join(tmpdir(), "yamllint-compat-"));
 
     try {
@@ -112,7 +149,7 @@ const run = async () => {
 
         const bridgeConfig = getSingleFlatConfig(pluginConfigs, "yamllintOnly");
         const bridgeEslint = new ESLint({
-            cwd: process.cwd(),
+            cwd: packageRoot,
             overrideConfig: {
                 ...bridgeConfig,
                 rules: {
@@ -128,7 +165,7 @@ const run = async () => {
         assertDiagnostic(bridgeResult, "yamllint/yamllint", "Yamllint bridge");
 
         const configEslint = new ESLint({
-            cwd: process.cwd(),
+            cwd: packageRoot,
             overrideConfig: getSingleFlatConfig(pluginConfigs, "configuration"),
             overrideConfigFile: true,
         });

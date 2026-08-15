@@ -30,13 +30,7 @@
             "pattern": "^mailto:"
         },
         {
-            "pattern": "^https://nick2bad4u\\.github\\.io/"
-        },
-        {
             "pattern": "^#.*$"
-        },
-        {
-            "pattern": "^https://raw.githubusercontent.com/nick2bad4u/Uptime-Watcher/metrics/"
         },
         {
             "pattern": "^https://localhost"
@@ -48,7 +42,7 @@
             "pattern": "^file://"
         }
     ],
-    "projectBaseUrl": "https://nick2bad4u.github.io/Uptime-Watcher/",
+    "projectBaseUrl": "https://nick2bad4u.github.io/eslint-plugin-yamllint/",
     "replacementPatterns": [],
     "retryCount": 3,
     "retryOn429": true,

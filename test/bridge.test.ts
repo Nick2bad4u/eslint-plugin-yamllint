@@ -44,7 +44,7 @@ describe("yamllint bridge rule", () => {
     it("accepts valid YAML files without diagnostics", async () => {
         expect.assertions(1);
 
-        await usingTemporaryDirectory(
+        const messages = await usingTemporaryDirectory(
             "yamllint-bridge-clean-",
             async (temporaryDirectory) => {
                 const configPath = path.join(temporaryDirectory, ".yamllint");
@@ -62,9 +62,11 @@ describe("yamllint bridge rule", () => {
                     filePath: "sample.yml",
                 });
 
-                expect(result?.messages).toHaveLength(0);
+                return result?.messages ?? [];
             }
         );
+
+        expect(messages).toHaveLength(0);
     }, 30_000);
 
     it("lints YAML fixture files from disk with forwarded options", async () => {
@@ -96,7 +98,7 @@ describe("yamllint bridge rule", () => {
     it("reports Yamllint diagnostics through ESLint", async () => {
         expect.assertions(3);
 
-        await usingTemporaryDirectory(
+        const messages = await usingTemporaryDirectory(
             "yamllint-bridge-",
             async (temporaryDirectory) => {
                 const configPath = path.join(temporaryDirectory, ".yamllint");
@@ -109,13 +111,13 @@ describe("yamllint bridge rule", () => {
                     filePath: "sample.yml",
                 });
 
-                expect(result?.messages).not.toHaveLength(0);
-                expect(result?.messages[0]?.ruleId).toBe("yamllint/yamllint");
-                expect(result?.messages[0]?.message).toStrictEqual(
-                    expect.any(String)
-                );
+                return result?.messages ?? [];
             }
         );
+
+        expect(messages).not.toHaveLength(0);
+        expect(messages[0]?.ruleId).toBe("yamllint/yamllint");
+        expect(messages[0]?.message).toStrictEqual(expect.any(String));
     }, 30_000);
 
     it("reports Yamllint execution failures as configuration errors", async () => {

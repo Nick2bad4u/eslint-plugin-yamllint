@@ -49,59 +49,60 @@ const yamllintRule: RuleModuleWithDocs<MessageIds, Options> = createTypedRule<
     MessageIds,
     Options
 >({
-    create: (context, [rawOptions = {}]) =>
-        toRuleListener({
-            Program() {
-                const lintOptions = {
-                    code: context.sourceCode.text,
-                    codeFilename: context.physicalFilename,
-                    cwd: context.cwd,
-                    ...(isDefined(rawOptions.configFile) && {
-                        configFile: rawOptions.configFile,
-                    }),
-                    ...(isDefined(rawOptions.noWarnings) && {
-                        noWarnings: rawOptions.noWarnings,
-                    }),
-                    ...(isDefined(rawOptions.strict) && {
-                        strict: rawOptions.strict,
-                    }),
-                    ...(isDefined(rawOptions.timeoutMs) && {
-                        timeoutMs: rawOptions.timeoutMs,
-                    }),
-                };
-                let lintResult: ReturnType<typeof runYamllintSynchronously>;
-                try {
-                    lintResult = runYamllintSynchronously(lintOptions);
-                } catch (error: unknown) {
-                    context.report({
-                        data: {
-                            // eslint-disable-next-line canonical/no-use-extend-native -- unicorn/prefer-error-is-error requires the native Error.isError guard.
-                            message: Error.isError(error)
-                                ? error.message
-                                : String(error),
-                        },
-                        loc: {
-                            end: { column: 0, line: 1 },
-                            start: { column: 0, line: 1 },
-                        },
-                        messageId: "yamllintConfigError",
-                        node: context.sourceCode.ast,
-                    });
-                    return;
-                }
-                for (const message of lintResult.messages) {
-                    context.report({
-                        data: {
-                            rule: message.rule ?? "yamllint",
-                            text: message.message,
-                        },
-                        loc: toEslintLoc(message),
-                        messageId: "yamllintProblem",
-                        node: context.sourceCode.ast,
-                    });
-                }
-            },
-        }),
+    create: (context, [rawOptions = {}]) => {
+        const onProgram = (): void => {
+            const lintOptions = {
+                code: context.sourceCode.text,
+                codeFilename: context.physicalFilename,
+                cwd: context.cwd,
+                ...(isDefined(rawOptions.configFile) && {
+                    configFile: rawOptions.configFile,
+                }),
+                ...(isDefined(rawOptions.noWarnings) && {
+                    noWarnings: rawOptions.noWarnings,
+                }),
+                ...(isDefined(rawOptions.strict) && {
+                    strict: rawOptions.strict,
+                }),
+                ...(isDefined(rawOptions.timeoutMs) && {
+                    timeoutMs: rawOptions.timeoutMs,
+                }),
+            };
+            let lintResult: ReturnType<typeof runYamllintSynchronously>;
+            try {
+                lintResult = runYamllintSynchronously(lintOptions);
+            } catch (error: unknown) {
+                context.report({
+                    data: {
+                        // eslint-disable-next-line canonical/no-use-extend-native -- unicorn/prefer-error-is-error requires the native Error.isError guard.
+                        message: Error.isError(error)
+                            ? error.message
+                            : String(error),
+                    },
+                    loc: {
+                        end: { column: 0, line: 1 },
+                        start: { column: 0, line: 1 },
+                    },
+                    messageId: "yamllintConfigError",
+                    node: context.sourceCode.ast,
+                });
+                return;
+            }
+            for (const message of lintResult.messages) {
+                context.report({
+                    data: {
+                        rule: message.rule ?? "yamllint",
+                        text: message.message,
+                    },
+                    loc: toEslintLoc(message),
+                    messageId: "yamllintProblem",
+                    node: context.sourceCode.ast,
+                });
+            }
+        };
+
+        return toRuleListener({ Program: onProgram });
+    },
     meta: {
         defaultOptions: [{}],
         deprecated: false,
@@ -117,6 +118,7 @@ const yamllintRule: RuleModuleWithDocs<MessageIds, Options> = createTypedRule<
             requiresTypeChecking: false,
             url: "https://nick2bad4u.github.io/eslint-plugin-yamllint/docs/rules/yamllint",
         },
+        languages: ["js/js"],
         messages: {
             yamllintConfigError: "Yamllint configuration error: {{message}}",
             yamllintProblem: "Yamllint ({{rule}}): {{text}}",

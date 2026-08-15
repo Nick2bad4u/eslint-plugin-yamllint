@@ -8,7 +8,7 @@
     --ifm-color-primary-lightest: #a7f3d0;
     --ifm-code-font-size: 95%;
     --ifm-font-family-base:
-        Inter, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont,
+        "Inter", "Segoe UI", system-ui, -apple-system, "BlinkMacSystemFont",
         sans-serif;
     --sb-accent-overview: #22c55e;
     --sb-accent-started: #0ea5e9;
