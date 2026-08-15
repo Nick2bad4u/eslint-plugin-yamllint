@@ -38,6 +38,8 @@ on:
                 default: false
                 type: "boolean"
 
+permissions: {}
+
 defaults:
     run:
         shell: "bash"
