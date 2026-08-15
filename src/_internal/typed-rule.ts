@@ -28,6 +28,7 @@ export type GenericRuleListener = Readonly<
 export type RuleDefinitionWithDocs<
     MessageIds extends string,
     Options extends Readonly<UnknownArray>,
+    Languages extends readonly YamllintRuleLanguage[] = readonly ["js/js"],
 > = Except<
     TSESLint.RuleModule<MessageIds, Options>,
     | "create"
@@ -38,7 +39,7 @@ export type RuleDefinitionWithDocs<
         context: GenericRuleContext<MessageIds, Options>,
         options: Options
     ) => TSESLint.RuleListener;
-    meta: YamllintRuleMetadata<MessageIds, Options>;
+    meta: YamllintRuleMetadata<MessageIds, Options, Languages>;
     name: string;
 };
 
@@ -48,8 +49,9 @@ export type RuleDefinitionWithDocs<
 export type RuleModuleWithDocs<
     MessageIds extends string,
     Options extends Readonly<UnknownArray>,
+    Languages extends readonly YamllintRuleLanguage[] = readonly ["js/js"],
 > = Except<TSESLint.RuleModule<MessageIds, Options>, "meta" | "name"> & {
-    meta: YamllintRuleMetadata<MessageIds, Options>;
+    meta: YamllintRuleMetadata<MessageIds, Options, Languages>;
     name: string;
 };
 
@@ -65,13 +67,16 @@ export type YamllintRuleDocs = Readonly<{
     url: string;
 }>;
 
+type YamllintRuleLanguage = "js/js" | "yml/yaml";
+
 type YamllintRuleMetadata<
     MessageIds extends string,
     Options extends Readonly<UnknownArray>,
+    Languages extends readonly YamllintRuleLanguage[],
 > = TSESLint.RuleMetaData<MessageIds, YamllintRuleDocs, Options> & {
     deprecated: boolean;
     docs: YamllintRuleDocs;
-    languages: readonly ["js/js"];
+    languages: Languages;
 };
 
 const isReadonlyRecord = (value: unknown): value is Readonly<UnknownRecord> =>
@@ -133,9 +138,12 @@ const getMergedRuleOptions = <Options extends Readonly<UnknownArray>>(
 export const createTypedRule = <
     MessageIds extends string,
     Options extends Readonly<UnknownArray>,
+    Languages extends readonly YamllintRuleLanguage[] = readonly ["js/js"],
 >(
-    ruleDefinition: Readonly<RuleDefinitionWithDocs<MessageIds, Options>>
-): RuleModuleWithDocs<MessageIds, Options> => {
+    ruleDefinition: Readonly<
+        RuleDefinitionWithDocs<MessageIds, Options, Languages>
+    >
+): RuleModuleWithDocs<MessageIds, Options, Languages> => {
     const canonicalDocsUrl = createRuleDocsUrl(ruleDefinition.name);
     if (ruleDefinition.meta.docs.url !== canonicalDocsUrl) {
         throw new TypeError(

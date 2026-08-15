@@ -64,16 +64,22 @@ describe("yamllint plugin configs", () => {
         );
     });
 
-    it("limits every public rule to ESLint's JavaScript language model", () => {
-        expect.assertions(1);
+    it("declares the ESLint language models supported by each rule", () => {
+        expect.assertions(2);
 
         expect(
-            Object.values(yamllintPlugin.rules).map(
-                (rule) => rule.meta.languages
-            )
+            Object.entries(yamllintPlugin.rules)
+                .filter(([ruleName]) => ruleName !== "yamllint")
+                .map(([, rule]) => rule.meta.languages)
         ).toStrictEqual(
-            Object.values(yamllintPlugin.rules).map(() => ["js/js"])
+            Object.keys(yamllintPlugin.rules)
+                .filter((ruleName) => ruleName !== "yamllint")
+                .map(() => ["js/js"])
         );
+        expect(yamllintPlugin.rules.yamllint?.meta.languages).toStrictEqual([
+            "js/js",
+            "yml/yaml",
+        ]);
     });
 
     it("composes exported presets with ESLint's JSON languages", async () => {

@@ -40,15 +40,13 @@ const toEslintLoc = (
 });
 
 /**
- * YamllintRule ESLint rule contract.
- */
-/**
  * YamllintRule ESLint bridge rule contract.
  */
-const yamllintRule: RuleModuleWithDocs<MessageIds, Options> = createTypedRule<
+const yamllintRule: RuleModuleWithDocs<
     MessageIds,
-    Options
->({
+    Options,
+    readonly ["js/js", "yml/yaml"]
+> = createTypedRule<MessageIds, Options, readonly ["js/js", "yml/yaml"]>({
     create: (context, [rawOptions = {}]) => {
         const onProgram = (): void => {
             const lintOptions = {
@@ -118,7 +116,7 @@ const yamllintRule: RuleModuleWithDocs<MessageIds, Options> = createTypedRule<
             requiresTypeChecking: false,
             url: "https://nick2bad4u.github.io/eslint-plugin-yamllint/docs/rules/yamllint",
         },
-        languages: ["js/js"],
+        languages: ["js/js", "yml/yaml"],
         messages: {
             yamllintConfigError: "Yamllint configuration error: {{message}}",
             yamllintProblem: "Yamllint ({{rule}}): {{text}}",
