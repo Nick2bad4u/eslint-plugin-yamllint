@@ -40,10 +40,3 @@ export const yamllintRules: YamllintRulesRegistry = {
     "sort-yamllint-rule-keys": sortYamllintRuleKeysRule,
     yamllint: yamllintRule,
 } as const satisfies YamllintRulesRegistry;
-
-/**
- * YamllintRuleNamePattern yamllint rule name pattern contract.
- */
-export type YamllintRuleNamePattern = keyof typeof yamllintRules;
-
-export default yamllintRules;

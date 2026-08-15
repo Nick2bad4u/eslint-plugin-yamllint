@@ -1,7 +1,5 @@
 import type { ArrayValues } from "type-fest";
 
-import { objectHasOwn } from "ts-extras";
-
 /**
  * YamllintConfigNames yamllint config names contract.
  */
@@ -55,17 +53,6 @@ export const yamllintConfigMetadataByName: Readonly<
 };
 
 /**
- * YamllintConfigNamesByReadmeOrder yamllint config names by readme order
- * contract.
- */
-export const yamllintConfigNamesByReadmeOrder: readonly YamllintConfigName[] = [
-    "recommended",
-    "yamllintOnly",
-    "configuration",
-    "all",
-];
-
-/**
  * YamllintConfigReferenceToName yamllint config reference to name contract.
  */
 export const yamllintConfigReferenceToName = {
@@ -82,11 +69,3 @@ export const yamllintConfigReferenceToName = {
  */
 export type YamllintConfigReference =
     keyof typeof yamllintConfigReferenceToName;
-
-/**
- * IsYamllintConfigReference is yamllint config reference contract.
- */
-export const isYamllintConfigReference = (
-    value: string
-): value is YamllintConfigReference =>
-    objectHasOwn(yamllintConfigReferenceToName, value);

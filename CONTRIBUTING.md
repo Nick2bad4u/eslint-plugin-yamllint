@@ -1,14 +1,14 @@
-# Contributing to eslint-plugin-remark
+# Contributing to eslint-plugin-yamllint
 
 Thanks for your interest in contributing.
 
-This repository contains an ESLint plugin focused on integrating Remark into
-ESLint and enforcing Remark configuration best practices.
+This repository contains an ESLint plugin that runs yamllint-js through ESLint
+and enforces conventions for Yamllint configuration files.
 
 ## Prerequisites
 
-- Node.js `>=22.0.0` (see `package.json#engines`)
-- npm `>=11`
+- Node.js `26.7.0` for repository development (see `.node-version`)
+- npm `12.0.2` (see `package.json#packageManager`)
 - Git
 
 ## Local setup
@@ -18,15 +18,15 @@ ESLint and enforcing Remark configuration best practices.
 2. Install dependencies from the repository root:
 
    ```bash
-   npm ci --force
+   npm ci
    ```
 
 3. Run the main quality gate:
 
    ```bash
-   npm run lint:all:fix:quiet
-   npm run typecheck
-   npm test
+   npm run release:verify
+   npm run coverage
+   npm run lint:all
    ```
 
 ## Recommended development workflow

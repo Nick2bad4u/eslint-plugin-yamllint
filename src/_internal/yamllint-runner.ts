@@ -83,6 +83,9 @@ const readWorkerResponse = (
 
 /**
  * RunYamllintSynchronously run Yamllint synchronously contract.
+ *
+ * @throws An `Error` when the worker times out, fails, or returns an invalid
+ *   response.
  */
 export const runYamllintSynchronously = (
     options: SerializableYamllintLintOptions

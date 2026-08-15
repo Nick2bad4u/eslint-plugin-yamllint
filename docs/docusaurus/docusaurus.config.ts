@@ -15,8 +15,12 @@ const enableExperimentalFaster =
 
 const organizationName = "Nick2bad4u";
 const projectName = "eslint-plugin-yamllint";
-const siteOrigin = "https://nick2bad4u.github.io";
-const siteUrl = `${siteOrigin}${baseUrl}`;
+const canonicalSiteUrl = new URL(
+    "https://nick2bad4u.github.io/eslint-plugin-yamllint/"
+);
+const siteOrigin = canonicalSiteUrl.origin;
+const resolvedSiteUrl = new URL(baseUrl, canonicalSiteUrl);
+const siteUrl = resolvedSiteUrl.href;
 const siteDescription =
     "Run Yamllint from ESLint, report YAML diagnostics in the same editor and CI stream, and enforce Yamllint config-file conventions alongside the rest of your lint stack.";
 const projectTagline = "YAML diagnostics inside ESLint.";

@@ -59,63 +59,59 @@ const SIDEBAR_TOKENIZED_DATA_KEY = "sbTokenized";
 function applySidebarLabelTokenColoring(): CleanupFunction {
     const mutations: SidebarLabelMutation[] = [];
 
+    const shouldColorRuntimeSidebarLink = (
+        link: HTMLAnchorElement,
+        linkLabel: string
+    ): boolean => {
+        if (!isRuntimeSidebarLink(link)) return false;
+
+        const runtimePrefix = getRuntimeSidebarKindPrefix(linkLabel);
+        if (runtimePrefix === null) return false;
+
+        const remainderText = linkLabel.slice(runtimePrefix.length).trimStart();
+        if (remainderText.length === 0) return false;
+
+        mutations.push({ element: link, originalLabel: linkLabel });
+        setSidebarLeadingToken({
+            link,
+            remainderText,
+            separator: "",
+            tokenClassName: "sb-inline-runtime-kind",
+            tokenText: `${runtimePrefix}${nonBreakingSpace}`,
+        });
+        return true;
+    };
+
+    const colorNumberedRuleSidebarLink = (
+        link: HTMLAnchorElement,
+        linkLabel: string
+    ): void => {
+        if (!isNumberedRuleSidebarLink(link)) return;
+
+        const ruleNumberPrefix = getRuleNumberPrefix(linkLabel);
+        if (ruleNumberPrefix === null) return;
+
+        mutations.push({ element: link, originalLabel: linkLabel });
+        setSidebarLeadingToken({
+            link,
+            remainderText: ruleNumberPrefix.remainder,
+            tokenClassName: "sb-inline-rule-number",
+            tokenText: ruleNumberPrefix.numberToken,
+        });
+    };
+
+    const processLink = (link: HTMLAnchorElement): void => {
+        if (isSidebarLinkTokenized(link)) return;
+
+        const linkLabel = link.textContent.trim();
+        if (linkLabel.length === 0) return;
+        if (shouldColorRuntimeSidebarLink(link, linkLabel)) return;
+
+        colorNumberedRuleSidebarLink(link, linkLabel);
+    };
+
     const processLinks = (sidebarLinks: readonly HTMLAnchorElement[]): void => {
-        for (const link of sidebarLinks) {
-            if (isSidebarLinkTokenized(link)) {
-                continue;
-            }
-
-            const linkLabel = link.textContent.trim();
-
-            if (!linkLabel) {
-                continue;
-            }
-
-            if (isRuntimeSidebarLink(link)) {
-                const runtimePrefix = getRuntimeSidebarKindPrefix(linkLabel);
-
-                if (runtimePrefix !== null) {
-                    const remainderText = linkLabel
-                        .slice(runtimePrefix.length)
-                        .trimStart();
-
-                    if (remainderText.length > 0) {
-                        mutations.push({
-                            element: link,
-                            originalLabel: linkLabel,
-                        });
-
-                        setSidebarLeadingToken({
-                            link,
-                            remainderText,
-                            separator: "",
-                            tokenClassName: "sb-inline-runtime-kind",
-                            tokenText: `${runtimePrefix}${nonBreakingSpace}`,
-                        });
-                    }
-
-                    continue;
-                }
-            }
-
-            if (isNumberedRuleSidebarLink(link)) {
-                const ruleNumberPrefix = getRuleNumberPrefix(linkLabel);
-
-                if (ruleNumberPrefix !== null) {
-                    mutations.push({
-                        element: link,
-                        originalLabel: linkLabel,
-                    });
-
-                    setSidebarLeadingToken({
-                        link,
-                        remainderText: ruleNumberPrefix.remainder,
-                        tokenClassName: "sb-inline-rule-number",
-                        tokenText: ruleNumberPrefix.numberToken,
-                    });
-                }
-            }
-        }
+        for (const link of sidebarLinks) processLink(link);
     };
 
     const processSidebarMenuLinks = (): void => {
