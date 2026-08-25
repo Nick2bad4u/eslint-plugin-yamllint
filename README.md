@@ -4,6 +4,8 @@
 
 `eslint-plugin-yamllint` runs Yamllint from ESLint and adds Yamllint-specific config authoring rules.
 
+> **Oxlint:** Not compatible as a complete plugin (verified with Oxlint 1.80.0); the core `yamllint` bridge rule and the aggregate presets target YAML and `.yamllint` files through `yaml-eslint-parser`, and [Oxlint JavaScript plugins do not support custom parsers](https://oxc.rs/docs/guide/usage/linter/js-plugins.html#api-support), so use ESLint for the full 10-rule plugin.
+
 ## Installation
 
 ```sh
