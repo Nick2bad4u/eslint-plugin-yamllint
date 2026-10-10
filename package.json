@@ -155,7 +155,7 @@
         "tsdoc-config-nick2bad4u": "^1.0.6",
         "typescript": "^6.0.3",
         "vite": "^8.2.1",
-        "vitest": "^4.1.10",
+        "vitest": "^5.0.3",
         "yamllint-config-nick2bad4u": "^1.1.1"
     },
     "peerDependencies": {
